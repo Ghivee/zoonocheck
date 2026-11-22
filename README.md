@@ -1,41 +1,30 @@
 ﻿# ZoonoCheck
 
-Proyek pribadi untuk portofolio.
+[Proyek ini adalah sebuah aplikasi/website yang dibuat untuk kebutuhan sehari-hari]
 
-## Fitur Utama (Features)
+[subjudul boleh diisi manual nanti biar sesuai kebutuhan user]
 
-- Menyelesaikan masalah spesifik
-- Kode yang bersih
-- Dokumentasi lengkap
-- Mudah di-maintain
+## Latar Belakang
 
-- Solves specific problems
-- Clean code
-- Complete documentation
-- Easy to maintain
+Biasanya ini situasi. You know what I mean? Dulu sempat bingung sebab butuh sesuatu untuk keperluan pribadi. So I decided to create my own. Macam biasa, bukan tempat makmur. Only that.
 
-## Cara Pakai (How to Use)
+Only that you know.
 
-### Indonesia:
-1. Baca dokumentasi
-2. Ikuti instruksi instalasi
-3. Jalankan proyek
+## Fitur Utama
 
-### English:
-1. Read documentation
-2. Follow installation instructions
-3. Run project
+- [Fitur 1]
+- [Fitur 2]
+- [Fitur 3]
+- [Fitur lainnya boleh ditambahkan manual]
 
-## Tech Stack
+## Cara Kerja
 
-- Various technologies based on project needs
+Secara garis besarnya, nice to have. Biasa-biasa aja. But it works.
 
-## Author
+## Catatan Penting
 
-Galang Ahmad Ghifari
-Website: https://ghifariahmad212.github.io
-GitHub: https://github.com/Ghivee
+- Proyek ini open-source, jadi free to use sesuai kebutuhan Anda
+- Bisa dikembangkan lebih lanjut sesuai keinginan
+- Feedback sangat dihargai
 
-## License
-
-Personal project
+---
