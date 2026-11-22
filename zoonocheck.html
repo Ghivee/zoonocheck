@@ -1,0 +1,241 @@
+<!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZoonoCheck — Ensiklopedi Zoonosis Hewan Kesayangan</title>
+<link rel="manifest" href="manifest.webmanifest"><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<!-- ZOONOCHECK v1 prototype. Lanjutkan: konten ada di const DATA; state lokal di localStorage "zoonocheck:v1:*". TODO ada di blok akhir file. -->
+<style>
+:root{--blue:#1D4ED8;--sky:#38BDF8;--pink:#EC4899;--lav:#7C5CE0;--navy:#0F172A;--bd:#E2E8F0;--bgb:#EFF6FF;--bgp:#FDF2F8;--bg:#F8FAFC;--mut:#475569;--ok:#0F766E}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font:16px/1.65 Inter,system-ui,sans-serif;color:var(--navy);background:var(--bg);padding-bottom:70px}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;line-height:1.15;margin:0 0 .5em}
+h1{font-size:clamp(2.3rem,7vw,4.6rem)}h2{font-size:clamp(1.6rem,4vw,2.5rem)}h3{font-size:1.2rem}
+a{color:var(--blue)}:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+header{position:sticky;top:0;z-index:20;background:#fffffff2;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:16px;padding:10px 20px}
+.logo{font:700 1.3rem Fraunces,serif;color:var(--blue);text-decoration:none;margin-right:auto}
+nav.top a{margin:0 8px;text-decoration:none;color:var(--mut);padding:6px 2px}nav.top a[aria-current=page]{color:var(--blue);border-bottom:2px solid var(--blue)}
+.btn{display:inline-block;min-height:44px;padding:10px 20px;border-radius:12px;border:2px solid var(--blue);background:#fff;color:var(--blue);font:600 1rem Inter,sans-serif;cursor:pointer;text-decoration:none}
+.btn.p{background:var(--pink);border-color:var(--pink);color:#fff}.btn.b{background:var(--blue);color:#fff}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.ch{min-height:80vh;padding:72px 0;border-bottom:1px solid var(--bd)}
+.ch>.wrap{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+.sticky{position:sticky;top:90px}
+.rail{position:fixed;right:14px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:10}
+.rail a{width:14px;height:14px;border-radius:50%;border:2px solid var(--blue);background:#fff;display:block}.rail a.on{background:var(--pink);border-color:var(--pink);transform:scale(1.3)}
+.lead{font-size:1.15rem;color:var(--mut);max-width:60ch}
+.hero{background:linear-gradient(120deg,var(--bgb) 55%,var(--bgp));}
+.germ{width:100%;max-width:340px;margin:auto;display:block}
+.germ .orb{transform-origin:center;animation:fl 6s ease-in-out infinite}
+@keyframes fl{50%{transform:translateY(-8px)}}
+.nodes{position:relative;height:340px}
+.node{position:absolute;width:112px;height:112px;border-radius:50%;border:3px solid var(--blue);background:#fff;font:600 .9rem Inter;cursor:pointer;color:var(--navy)}
+.node[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--pink)}
+.n1{left:30px;top:0}.n2{right:30px;top:60px}.n3{left:90px;bottom:0}
+.panel{background:#fff;border:1px solid var(--bd);border-radius:16px;padding:20px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.chip{min-height:44px;padding:6px 16px;border-radius:99px;border:2px solid var(--bd);background:#fff;font:600 .9rem Inter;cursor:pointer}.chip[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+.cards{display:grid;gap:16px}
+.card{display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid var(--bd);border-left:8px solid var(--c);border-radius:16px;padding:18px}
+.card:nth-child(2){margin-left:24px}.card small{color:var(--mut)}.tag{font-weight:600;color:var(--c)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}.tab{flex:1;min-height:56px;border:2px solid var(--bd);border-radius:14px;background:#fff;font:600 1rem Inter;cursor:pointer}.tab[aria-selected=true]{border-color:var(--blue);background:var(--bgb)}
+.bar{height:12px;background:var(--bd);border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:var(--blue);width:0;transition:width .4s}
+label.ck{display:flex;gap:12px;align-items:flex-start;min-height:44px;padding:8px 0;cursor:pointer}label.ck input{width:22px;height:22px;flex:none;accent-color:var(--blue)}
+.detail{display:grid;grid-template-columns:1fr 260px;gap:32px;padding:40px 0}
+.detail aside{position:sticky;top:80px;align-self:start}.detail aside a{display:block;padding:4px 0}
+.detail section{margin-bottom:36px;scroll-margin-top:80px}
+.warn{background:var(--bgp);border-left:6px solid var(--pink);padding:14px 18px;border-radius:10px}
+.draft{background:#FEF9C3;border-radius:10px;padding:8px 14px;font-size:.9rem}
+.q{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;padding:14px 0;border-bottom:1px solid var(--bd)}
+.q div[role=radiogroup]{display:flex;gap:8px}
+.q label{border:2px solid var(--bd);border-radius:10px;padding:8px 14px;min-height:44px;cursor:pointer;background:#fff}.q input{position:absolute;opacity:0}.q label:has(input:checked){background:var(--bgb);border-color:var(--blue);font-weight:600}.q label:has(input:focus-visible){outline:3px solid var(--pink)}
+.due{color:#B91C1C;font-weight:600}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+input[type=date],input[type=time],input[type=search],input[type=number]{min-height:44px;padding:8px 12px;border:2px solid var(--bd);border-radius:10px;font:inherit}
+input[type=search]{width:100%}
+footer{padding:40px 20px;text-align:center;color:var(--mut);font-size:.9rem}
+nav.bot{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--bd);z-index:20}
+nav.bot a{flex:1;text-align:center;padding:12px 2px;min-height:56px;text-decoration:none;color:var(--mut);font-size:.85rem}nav.bot a[aria-current=page]{color:var(--blue);font-weight:600}
+#pb{position:fixed;top:0;left:0;height:4px;width:100%;background:linear-gradient(90deg,var(--blue),var(--pink));transform:scaleX(0);transform-origin:0 0;z-index:50}
+.js .rv{opacity:0;transform:translateY(26px);transition:opacity .7s var(--d,0ms),transform .7s var(--d,0ms)}.js .rv.in{opacity:1;transform:none}
+.il{width:100%;max-width:440px;display:block;margin:auto}.fl{animation:fl 5s ease-in-out infinite}.fl2{animation:fl 7s ease-in-out infinite reverse}
+.ln{stroke-dasharray:6 8;animation:dash 1.2s linear infinite}@keyframes dash{to{stroke-dashoffset:-28}}
+.nd{cursor:pointer}.nd .bg{fill:#fff;stroke:var(--blue);stroke-width:3;transition:.3s}.nd[aria-pressed=true] .bg{fill:#FDF2F8;stroke:var(--pink);stroke-width:6}.nd:hover .bg{fill:var(--bgb)}.nd:focus-visible{outline:3px solid var(--pink)}
+.flow{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.fs{flex:1;min-width:130px;background:#fff;border:2px solid var(--bd);border-radius:12px;padding:10px;font-size:.9rem}.fs b{display:block;color:#BE185D}.ar{align-self:center;color:var(--blue);font-size:1.4rem;animation:nudge 1.4s infinite}@keyframes nudge{50%{transform:translateX(6px)}}
+.tall{height:260vh;padding:0}.pin{position:sticky;top:56px;height:calc(100vh - 56px);display:flex;align-items:center}.pin>.wrap{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;width:100%}.pin .sticky{position:static}
+#sp svg{animation:pop .5s}@keyframes pop{from{opacity:0;transform:scale(.92)}}
+.agent{margin:0 0 24px;text-align:center}.agent svg{max-width:230px;margin:auto;display:block}.agent figcaption{font-size:.85rem;color:var(--mut)}
+.stp{display:flex;gap:6px;margin-top:14px}.stp i{height:6px;flex:1;border-radius:4px;background:var(--bd);transition:.4s}.stp i.on{background:var(--pink)}
+@media(prefers-reduced-motion:reduce){.js .rv{opacity:1!important;transform:none!important}}
+@media(max-width:800px){.tall{height:auto;padding:48px 0}.pin{position:static;height:auto}.pin>.wrap{grid-template-columns:1fr}.stp{display:none}}
+@media(max-width:800px){.ch>.wrap,.detail{grid-template-columns:1fr}.sticky,.detail aside{position:static}nav.top{display:none}nav.bot{display:flex}.rail{display:none}.card:nth-child(2){margin-left:0}.ch{min-height:0;padding:48px 0}.detail aside{order:-1}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style></head><body>
+<a href="#main" class="btn" style="position:absolute;left:-999px" onfocus="this.style.left='8px'" onblur="this.style.left='-999px'">Lewati ke konten</a>
+<header><a class="logo" href="#home">ZoonoCheck</a><nav class="top" aria-label="Utama"></nav><a class="btn p" href="#skrining">Skrining</a></header>
+<div id="pb" aria-hidden="true"></div><main id="main" tabindex="-1"></main>
+<footer><p class="warn" style="max-width:720px;margin:0 auto 16px;text-align:left">ZoonoCheck adalah media edukasi berbasis bukti dan bukan pengganti diagnosis, pemeriksaan, atau saran profesional dari dokter hewan maupun tenaga medis. Informasi di sini tidak digunakan untuk menentukan obat atau dosis. Jika hewan atau anggota keluarga menunjukkan gejala yang mengkhawatirkan, hubungi profesional kesehatan yang sesuai.</p><a href="#tentang">Tentang &amp; privasi</a></footer>
+<nav class="bot" aria-label="Navigasi bawah"></nav>
+<script>
+document.documentElement.classList.add('js');
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const S={get(k,d){try{return JSON.parse(localStorage.getItem('zoonocheck:v1:'+k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem('zoonocheck:v1:'+k,JSON.stringify(v))}catch(e){}},clear(){try{Object.keys(localStorage).filter(k=>k.startsWith('zoonocheck:v1:')).forEach(k=>localStorage.removeItem(k))}catch(e){}}};
+const REV='Draft — belum ditelaah dokter hewan/tenaga medis. Jangan dipakai sebagai rekomendasi klinis.';
+const DATA=[
+{slug:'dermatofitosis',name:'Dermatofitosis (Ringworm)',sci:'Microsporum canis',type:'Jamur',animals:['kucing','anjing'],risk:['anak','imunokompromais'],route:['kontak'],color:'#EC4899',
+ sum:['Ringworm disebabkan jamur, bukan cacing.','Menular lewat kontak langsung dengan hewan atau benda yang terkontaminasi bulu/sisik kulit.','Hewan bisa tampak sehat namun tetap membawa jamur.'],
+ trans:['Hewan terinfeksi atau pembawa jamur','Bulu, sisik kulit, alas tidur, sisir','Kulit manusia yang kontak langsung'],
+ animal:['Bulu rontok membulat, kulit bersisik atau kemerahan.','Sebagian hewan tidak menunjukkan tanda apa pun. Diagnosis hanya oleh dokter hewan.'],
+ human:['Ruam melingkar, bersisik, dan gatal pada kulit.','Bercak tidak otomatis berarti ringworm; diagnosis oleh tenaga medis.'],
+ prev:{Hewan:['Periksakan hewan baru atau yang berbulu rontok ke dokter hewan.','Pisahkan alas tidur hewan yang sedang diperiksa.'],Manusia:['Cuci tangan dengan sabun setelah memegang hewan.','Hindari kontak kulit langsung dengan area bulu rontok.'],Lingkungan:['Vakum bulu secara rutin dan buang isinya.','Cuci alas tidur dan bersihkan perlengkapan hewan.']},
+ myth:[['Lampu Wood negatif berarti pasti bebas ringworm.','Tidak. Hasil negatif tidak otomatis menyingkirkan infeksi; tanyakan ke dokter hewan.']],
+ help:'Hubungi dokter hewan bila ada kerontokan atau kulit bersisik pada hewan. Hubungi dokter bila ruam pada manusia menetap, meluas, atau pada orang dengan daya tahan tubuh rendah.',
+ ref:['CDC — Ringworm (halaman edukasi)','https://www.cdc.gov/ringworm/']},
+{slug:'toksokariasis',name:'Toksokariasis',sci:'Toxocara canis / T. cati',type:'Cacing',animals:['kucing','anjing'],risk:['anak','ibu hamil'],route:['tanah'],color:'#0EA5E9',
+ sum:['Disebabkan cacing gelang pada anjing dan kucing.','Telur keluar bersama feses dan menjadi infektif di tanah setelah beberapa waktu.','Manusia terinfeksi bila tak sengaja menelan telur, misalnya dari tanah atau tangan kotor.'],
+ trans:['Hewan mengeluarkan telur lewat feses','Telur mencemari tanah atau pasir bermain','Tertelan lewat tangan, mainan, atau sayur berdebu tanah'],
+ animal:['Anak anjing/kucing: perut buncit, muntah, diare, bulu kusam.','Hewan dewasa sering tanpa tanda yang jelas.'],
+ human:['Sering tanpa gejala.','Sebagian kasus: demam, batuk, nyeri perut, atau gangguan mata. Diagnosis oleh tenaga medis.'],
+ prev:{Hewan:['Bawa hewan ke dokter hewan; ikuti jadwal pemeriksaan feses dan pengobatan cacing yang ditetapkan dokter hewan.'],Manusia:['Cuci tangan setelah bermain di tanah dan sebelum makan.','Awasi anak agar tidak memasukkan tanah ke mulut.'],Lingkungan:['Angkat feses hewan setiap hari dan buang dengan aman.','Tutup kotak pasir saat tidak dipakai.']},
+ myth:[['Hanya anak anjing yang bisa menularkan.','Hewan dewasa juga bisa mengeluarkan telur; angka dan konteksnya perlu merujuk sumber primer.']],
+ help:'Hubungi dokter bila anak mengalami demam berkepanjangan, batuk, atau gangguan penglihatan setelah paparan tanah yang mungkin tercemar.',
+ ref:['CDC — Toxocariasis (halaman edukasi)','https://www.cdc.gov/toxocariasis/']},
+{slug:'toksoplasmosis',name:'Toksoplasmosis',sci:'Toxoplasma gondii',type:'Protozoa',animals:['kucing'],risk:['ibu hamil','imunokompromais'],route:['tanah','makanan'],color:'#7C5CE0',
+ sum:['Disebabkan protozoa; kucing adalah inang tempat parasit berkembang biak dan mengeluarkan ookista.','Manusia bisa terinfeksi lewat ookista dari feses kucing atau daging/sayur yang tidak aman.','Banyak orang sehat tidak bergejala; kehamilan dan daya tahan tubuh rendah perlu perhatian khusus.'],
+ trans:['Kucing mengeluarkan ookista lewat feses','Tanah, pasir, air, sayur, atau daging mentah tercemar','Tertelan oleh manusia'],
+ animal:['Kucing umumnya tidak menunjukkan tanda yang jelas.'],
+ human:['Sering tanpa gejala atau mirip flu ringan.','Infeksi saat hamil dapat berdampak pada janin; konsultasikan ke tenaga medis.'],
+ prev:{Hewan:['Beri makanan matang atau komersial; hindari daging mentah.','Jaga kucing tetap di dalam rumah bila memungkinkan.'],Manusia:['Masak daging hingga matang; cuci sayur dan buah.','Cuci tangan dengan sabun setelah berkebun atau menyentuh litter box.','Ibu hamil sebaiknya tidak membersihkan litter box; minta anggota lain.'],Lingkungan:['Bersihkan litter box setiap hari dengan sarung tangan.','Gunakan sarung tangan saat berkebun.']},
+ myth:[['Memelihara kucing pasti menyebabkan toksoplasmosis.','Tidak. Sumber lain seperti daging kurang matang dan sayur tercemar juga berperan.']],
+ help:'Hubungi dokter kandungan atau dokter bila sedang hamil atau berdaya tahan rendah dan merasa terpapar atau sakit.',
+ ref:['CDC — Toxoplasmosis (halaman edukasi)','https://www.cdc.gov/toxoplasmosis/']}];
+const QS=[['Apakah ada anak balita di rumah?',['toksokariasis','dermatofitosis'],'Anak lebih sering memasukkan tangan atau tanah ke mulut.'],
+['Apakah ada ibu hamil di rumah?',['toksoplasmosis'],'Infeksi saat hamil perlu perhatian khusus.'],
+['Apakah kucing sering keluar rumah atau berburu?',['toksoplasmosis','toksokariasis'],'Hewan di luar lebih mungkin terpapar tanah dan mangsa.'],
+['Apakah hewan diberi daging mentah?',['toksoplasmosis'],'Daging mentah dapat membawa parasit.'],
+['Apakah ada kotak pasir atau area tanah/kebun?',['toksokariasis','toksoplasmosis'],'Tanah dapat tercemar feses hewan.'],
+['Apakah hewan memiliki lesi atau kerontokan kulit?',['dermatofitosis'],'Perlu dicek dokter hewan; kerontokan tidak otomatis berarti ringworm.']];
+const GEN=[['g1','Cuci tangan dengan sabun setelah kontak dengan hewan'],['g2','Bersihkan litter box dan angkat feses halaman hari ini'],['g3','Cuci alas tidur hewan'],['g4','Pastikan hewan diperiksa dokter hewan secara berkala']];
+const NAV=[['home','Beranda'],['ensiklopedi','Ensiklopedi'],['pengingat','Pengingat'],['skrining','Skrining'],['tentang','Tentang']];
+const E=slug=>DATA.find(d=>d.slug===slug);
+const sum=slug=>`<a class="card" style="--c:${E(slug).color}" href="#entri-${slug}"><span class="tag">${E(slug).type}</span><h3>${E(slug).name}</h3><small><i>${E(slug).sci}</i> · ${E(slug).animals.join(' & ')}</small></a>`;
+function checks(){return S.get('checks',{})}
+function toggleCheck(id,v){const c=checks();c[id]=v;S.set('checks',c)}
+function ck(id,txt){return `<label class="ck"><input type="checkbox" data-ck="${id}" ${checks()[id]?'checked':''}><span>${esc(txt)}</span></label>`}
+function bindChecks(root,bar){$$('[data-ck]',root).forEach(i=>i.onchange=()=>{toggleCheck(i.dataset.ck,i.checked);upd()});const upd=()=>{if(!bar)return;const a=$$('[data-ck]',root),n=a.filter(x=>x.checked).length;$('.bar i',bar).style.width=(n/a.length*100)+'%';$('.pt',bar).textContent=`${n} dari ${a.length} selesai`};upd()}
+
+/* ---------- Beranda ---------- */
+const nodeInfo={Hewan:'Hewan kesayangan dapat membawa agen tanpa tampak sakit.',Manusia:'Manusia terpapar lewat kontak, tanah, makanan, atau air yang tercemar.',Lingkungan:'Tanah, litter box, dan perlengkapan menjadi penghubung antara hewan dan manusia.'};
+const steps=[['Paparan','Agen keluar dari hewan lewat bulu, kulit, atau feses dan mencemari benda atau tanah.'],['Masuk ke tubuh','Agen masuk bila tangan, makanan, atau kulit yang tercemar menyentuh mulut atau kulit manusia.'],['Risiko infeksi','Paparan belum tentu menjadi infeksi. Risiko lebih tinggi pada anak, ibu hamil, dan orang berdaya tahan rendah.']];
+function home(){
+$('#main').innerHTML=`<nav class="rail" aria-label="Bab">${[1,2,3,4,5].map(i=>`<a href="#bab${i}" aria-label="Bab ${i}" data-b="bab${i}"></a>`).join('')}</nav>
+<section class="ch hero" id="bab1" aria-labelledby="h1"><div class="wrap"><div><h1 id="h1">Ancaman yang tak terlihat ada di rumah.</h1><p class="lead">Zoonosis bisa berpindah antara hewan, manusia, dan lingkungan. Kenali jalurnya, lalu cegah dengan kebiasaan kecil.</p><div class="row"><a class="btn p" href="#skrining">Mulai Skrining</a><a class="btn" href="#ensiklopedi">Jelajahi Ensiklopedi</a></div></div>
+${IL.hero()}</div></section>
+<section class="ch" id="bab2" aria-labelledby="h2"><div class="wrap"><div class="sticky"><h2 id="h2">Tiga dunia, satu cerita yang terhubung.</h2><div class="panel" aria-live="polite" id="ninfo">Pilih salah satu lingkaran untuk membaca penjelasannya.</div></div>${IL.oh()}</div></section>
+<section class="ch" id="bab3" aria-labelledby="h3"><div class="wrap"><div class="sticky"><h2 id="h3">Temukan informasi yang relevan.</h2><div class="chips" role="group" aria-label="Filter hewan">${['kucing','anjing'].map(a=>`<button class="chip" aria-pressed="false" data-f="${a}">${a[0].toUpperCase()+a.slice(1)}</button>`).join('')}</div><p id="hc" aria-live="polite"></p></div><div class="cards" id="hcards"></div></div></section>
+<section class="ch tall" id="bab4" aria-labelledby="h4"><div class="pin"><div class="wrap"><div class="sticky"><h2 id="h4">Pahami bagaimana penularan terjadi.</h2><div class="tabs" role="tablist" aria-label="Tahap penularan">${steps.map((s,i)=>`<button class="tab" role="tab" aria-selected="${!i}" data-s="${i}">${i+1}. ${s[0]}</button>`).join('')}</div></div><div class="panel" id="sp" role="tabpanel" aria-live="polite"></div></div></div></section>
+<section class="ch" id="bab5" aria-labelledby="h5"><div class="wrap"><div><h2 id="h5">Ubah pengetahuan jadi kebiasaan.</h2><p class="lead">Tandai yang sudah kamu lakukan. Progres tersimpan di perangkat ini.</p><a class="btn b" href="#pengingat">Atur pengingat</a></div><div class="panel" id="act"><div class="bar" role="img" aria-label="Progres"><i></i></div><p class="pt"></p>${GEN.map(g=>ck(g[0],g[1])).join('')}</div></div></section>`;
+const pick=n=>{$$('.nd').forEach(x=>x.setAttribute('aria-pressed',x===n));$('#ninfo').innerHTML=`<h3>${n.dataset.n}</h3>${nodeInfo[n.dataset.n]}`};$$('.nd').forEach(n=>{n.onclick=()=>pick(n);n.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(n)}}});
+const f=new Set(),draw=()=>{const r=DATA.filter(d=>[...f].every(a=>d.animals.includes(a)));$('#hcards').innerHTML=r.map(d=>sum(d.slug)).join('')||'<p>Tidak ada entri. Hapus filter untuk melihat semua.</p>';$('#hc').textContent=`Menampilkan ${r.length} entri`};
+$$('.chip').forEach(c=>c.onclick=()=>{const k=c.dataset.f;f.has(k)?f.delete(k):f.add(k);c.setAttribute('aria-pressed',f.has(k));draw()});draw();
+const st=i=>{$$('.tab').forEach((t,j)=>t.setAttribute('aria-selected',i==j));$('#sp').innerHTML=`${IL.stage(+i)}<h3>${steps[i][0]}</h3><p>${steps[i][1]}</p><div class="stp">${[0,1,2].map(j=>`<i class="${j<=i?'on':''}"></i>`).join('')}</div>`;window._cur=+i};$$('.tab').forEach(t=>t.onclick=()=>st(t.dataset.s));window._st=st;st(0);
+bindChecks($('#act'),$('#act'));
+if('IntersectionObserver'in window){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)$$('.rail a').forEach(a=>a.classList.toggle('on',a.dataset.b===e.target.id))}),{rootMargin:'-45% 0px -50% 0px'});$$('.ch').forEach(s=>io.observe(s))}}
+
+/* ---------- Ensiklopedi ---------- */
+function ensi(){
+$('#main').innerHTML=`<div class="wrap" style="padding-top:40px"><h1 style="font-size:2.6rem">Ensiklopedi Zoonosis</h1><p class="lead">Cari berdasarkan nama penyakit, nama ilmiah, atau kata kunci.</p><label for="q" class="lead">Pencarian</label><input type="search" id="q" placeholder="Contoh: Toxocara">
+<div id="fl"></div><div class="row" style="margin:12px 0"><button class="btn" id="rs">Reset filter</button><span id="cnt" aria-live="polite"></span></div><div class="cards" id="list" style="padding-bottom:40px"></div></div>`;
+const G={Hewan:['animals',['kucing','anjing']],'Kelompok risiko':['risk',['anak','ibu hamil','imunokompromais']],'Jalur penularan':['route',['kontak','tanah','makanan']]},sel={};
+$('#fl').innerHTML=Object.entries(G).map(([t,[k,v]])=>`<div role="group" aria-label="${t}"><strong>${t}</strong><div class="chips">${v.map(x=>`<button class="chip" aria-pressed="false" data-k="${k}" data-v="${x}">${x}</button>`).join('')}</div></div>`).join('');
+const draw=()=>{const q=$('#q').value.toLowerCase().trim();const r=DATA.filter(d=>(!q||[d.name,d.sci,d.type,...d.sum].join(' ').toLowerCase().includes(q))&&Object.entries(sel).every(([k,s])=>!s.size||[...s].some(v=>d[k].includes(v))));
+$('#cnt').textContent=`Menampilkan ${r.length} entri`;$('#list').innerHTML=r.map(d=>sum(d.slug)+`<p style="margin:-8px 0 0 8px">${d.sum[0]}</p>`).join('')||'<div class="panel">Tidak ada entri yang cocok. Coba kata kunci lain atau tekan Reset filter.</div>'};
+$$('#fl .chip').forEach(c=>c.onclick=()=>{const s=sel[c.dataset.k]??=new Set();s.has(c.dataset.v)?s.delete(c.dataset.v):s.add(c.dataset.v);c.setAttribute('aria-pressed',s.has(c.dataset.v));draw()});
+$('#q').oninput=draw;$('#rs').onclick=()=>{$('#q').value='';Object.keys(sel).forEach(k=>delete sel[k]);$$('#fl .chip').forEach(c=>c.setAttribute('aria-pressed',false));draw()};draw()}
+
+/* ---------- Detail (10 bagian) ---------- */
+function detail(slug){const d=E(slug);if(!d){location.hash='#ensiklopedi';return}
+const sec=[['identitas','Identitas & ringkasan',`<p><b><i>${d.sci}</i></b> · ${d.type} · ${d.animals.join(' & ')}</p><div class="panel" style="border-left:8px solid ${d.color}"><b>Ringkas 30 detik</b><ul>${d.sum.map(x=>`<li>${x}</li>`).join('')}</ul></div>`],
+['penularan','Bagaimana menular?',`${IL.flow(d)}<ol>${d.trans.map(x=>`<li>${x}</li>`).join('')}</ol>`],
+['hewan','Tanda pada hewan',`<ul>${d.animal.map(x=>`<li>${x}</li>`).join('')}</ul>`],
+['manusia','Tanda pada manusia',`<ul>${d.human.map(x=>`<li>${x}</li>`).join('')}</ul>`],
+['risiko','Siapa paling berisiko?',`<p>${d.risk.join(', ')}.</p>`],
+['pencegahan','Pencegahan 3 level',Object.entries(d.prev).map(([l,a])=>`<h3>${l}</h3>${a.map((t,i)=>ck(`${d.slug}-${l}-${i}`,t)).join('')}`).join('')],
+['mitos','Mitos vs fakta',d.myth.map(m=>`<p><b>Mitos:</b> ${m[0]}<br><b>Fakta:</b> ${m[1]}</p>`).join('')],
+['bantuan','Kapan mencari bantuan?',`<p class="warn">${d.help}</p>`],
+['sumber','Sumber ilmiah',`<p>${d.ref[0]} — <a href="${d.ref[1]}" target="_blank" rel="noopener">${d.ref[1]}</a></p><p class="draft">DOI dan rujukan primer: belum diisi. Verifikasi sebelum rilis.</p>`],
+['status','Status penelaahan',`<p class="draft">${REV}</p><p>Diperbarui: 7 November 2026</p>`]];
+$('#main').innerHTML=`<div class="wrap"><p style="padding-top:20px"><a href="#ensiklopedi">Ensiklopedi</a> / ${d.name}</p><h1 style="font-size:clamp(2rem,5vw,3.4rem);color:${d.color==='#EC4899'?'#BE185D':d.color}">${d.name}</h1><p class="draft">${REV}</p>
+<div class="detail"><article>${IL.agent(d)}${sec.map(s=>`<section id="${s[0]}" aria-labelledby="t-${s[0]}"><h2 id="t-${s[0]}" style="font-size:1.6rem">${s[1]}</h2>${s[2]}</section>`).join('')}<a class="btn b" href="#pengingat">Tambahkan ke Pengingat</a></article><aside class="panel"><b>Di halaman ini</b>${sec.map(s=>`<a href="#${s[0]}" data-a="1">${s[1]}</a>`).join('')}</aside></div></div>`;
+bindChecks($('#main'));$$('[data-a]').forEach(a=>a.onclick=e=>{e.preventDefault();$(a.getAttribute('href')).scrollIntoView();});}
+
+/* ---------- Pengingat ---------- */
+const DEF=[{id:'litter',t:'Bersihkan litter box',h:24,on:true,last:null},{id:'feses',t:'Angkat feses halaman',h:24,on:true,last:null}];
+const RW=['Vakum bulu','Cuci alas tidur','Disinfeksi perlengkapan'];
+function pengingat(){const R=S.get('reminders',DEF),draw=()=>{
+const now=Date.now(),isDue=r=>r.on&&(!r.last||now>=r.last+r.h*36e5);
+$('#main').innerHTML=`<div class="wrap" style="padding:40px 20px"><h1 style="font-size:2.6rem">Rutinitas kebersihan</h1><p class="lead">Pengingat tersimpan di perangkat ini. Tugas yang jatuh tempo ditandai saat kamu membuka halaman; notifikasi latar belakang tidak dijamin.</p>
+<div class="cards">${R.map((r,i)=>`<div class="panel"><h3>${esc(r.t)}</h3><p>${r.on?`Setiap ${r.h} jam · `:'Nonaktif · '}${isDue(r)?'<span class="due">Jatuh tempo</span>':'Aman'}</p><div class="row"><button class="btn b" data-do="${i}">Tandai selesai</button><label>Interval (jam) <input type="number" min="1" value="${r.h}" data-h="${i}" style="width:90px"></label><button class="btn" data-tg="${i}">${r.on?'Nonaktifkan':'Aktifkan'}</button></div></div>`).join('')}</div>
+<div class="row" style="margin:12px 0"><input type="text" id="nt" placeholder="Nama tugas baru" style="min-height:44px;padding:8px;border:2px solid var(--bd);border-radius:10px"><button class="btn" id="add">Tambah pengingat</button></div>
+<div class="panel" style="margin:20px 0"><h2 style="font-size:1.4rem">Jadwal kontrol dokter hewan</h2><p>Isi sesuai arahan dokter hewan. ZoonoCheck tidak menetapkan jadwal medis.</p><div class="row"><label>Tanggal <input type="date" id="cd"></label><label>Jam <input type="time" id="ct"></label><button class="btn b" id="cs">Simpan jadwal</button></div><p id="cv"></p></div>
+<div class="panel" style="background:var(--bgp)"><h2 style="font-size:1.4rem">Mode perawatan ringworm</h2><label class="ck"><input type="checkbox" id="rm"><span>Aktifkan mode</span></label><div id="rl"></div></div>
+<p><button class="btn" id="del">Hapus seluruh data lokal</button></p></div>`;
+const save=()=>{S.set('reminders',R);draw()};
+$$('[data-do]').forEach(b=>b.onclick=()=>{R[b.dataset.do].last=Date.now();save()});
+$$('[data-tg]').forEach(b=>b.onclick=()=>{const r=R[b.dataset.tg];r.on=!r.on;save()});
+$$('[data-h]').forEach(i=>i.onchange=()=>{R[i.dataset.h].h=Math.max(1,+i.value||24);save()});
+$('#add').onclick=()=>{const v=$('#nt').value.trim();if(v){R.push({id:'c'+now,t:v,h:24,on:true,last:null});save()}};
+const c=S.get('control',null);if(c){$('#cd').value=c.d;$('#ct').value=c.t;$('#cv').textContent=`Tersimpan: ${c.d} ${c.t}`}
+$('#cs').onclick=()=>{if(!$('#cd').value){$('#cv').textContent='Isi tanggal terlebih dahulu.';return}S.set('control',{d:$('#cd').value,t:$('#ct').value});$('#cv').textContent='Jadwal tersimpan.'};
+const rm=$('#rm'),rl=$('#rl');const rd=()=>{rl.innerHTML=rm.checked?RW.map((t,i)=>ck('rw'+i,t)).join(''):'';bindChecks(rl)};rm.checked=S.get('rmode',false);rd();rm.onchange=()=>{S.set('rmode',rm.checked);rd()};
+$('#del').onclick=()=>{if(confirm('Hapus semua checklist dan pengingat di perangkat ini?')){S.clear();draw()}}};draw()}
+
+/* ---------- Skrining ---------- */
+function skrining(){
+$('#main').innerHTML=`<div class="wrap" style="padding:40px 20px"><h1 style="font-size:2.6rem">Skrining risiko keluarga</h1><p class="lead">Bukan alat diagnosis. Jawaban diproses di perangkat ini dan tidak dikirim ke server.</p><form id="f" onsubmit="return false">${QS.map((q,i)=>`<fieldset class="q" style="border:0;border-bottom:1px solid var(--bd)"><legend style="float:left;max-width:60ch;padding:0">${i+1}. ${q[0]}</legend><div role="radiogroup">${['Ya','Tidak','Tidak yakin'].map(o=>`<label><input type="radio" name="q${i}" value="${o}">${o}</label>`).join('')}</div></fieldset>`).join('')}<div class="row" style="margin-top:20px"><button class="btn p" id="go">Lihat hasil</button><button class="btn" id="re" type="button">Ulangi</button></div></form><div id="res" aria-live="polite" tabindex="-1"></div></div>`;
+$('#go').onclick=()=>{const m={},why={};QS.forEach((q,i)=>{if((new FormData($('#f')).get('q'+i))==='Ya')q[1].forEach(s=>{m[s]=1;(why[s]??=[]).push(q[2])})});const ids=Object.keys(m);
+$('#res').innerHTML=ids.length?`<h2>Materi yang relevan</h2><div class="cards">${ids.map(s=>sum(s)+`<ul>${why[s].map(w=>`<li>${w}</li>`).join('')}</ul>`).join('')}</div><h3 style="margin-top:24px">Checklist prioritas</h3>${ids.flatMap(s=>Object.entries(E(s).prev).map(([l,a])=>ck(`${s}-${l}-0`,`${E(s).name}: ${a[0]}`))).join('')}`:'<div class="panel">Tidak ada materi khusus dari jawabanmu. Jelajahi ensiklopedi untuk gambaran umum.</div>';
+$('#res').innerHTML+=`<p class="warn">Bila ada tanda bahaya pada hewan atau anggota keluarga, hubungi dokter hewan atau fasilitas kesehatan. Hasil ini bukan diagnosis.</p>`;bindChecks($('#res'));$('#res').focus()};
+$('#re').onclick=()=>{$('#f').reset();$('#res').innerHTML=''}}
+
+/* ---------- Tentang ---------- */
+function tentang(){$('#main').innerHTML=`<div class="wrap" style="padding:40px 20px;max-width:760px"><h1 style="font-size:2.6rem">Tentang ZoonoCheck</h1><p>Website pendamping video edukasi 90 detik tentang zoonosis pada kucing dan anjing.</p><h2 style="font-size:1.4rem">Penelaahan konten</h2><p class="draft">${REV}</p><h2 style="font-size:1.4rem">Privasi</h2><p>Tanpa akun dan tanpa telemetri. Checklist dan pengingat hanya tersimpan di browser ini dan hilang bila data browser dihapus.</p><button class="btn" id="d">Hapus data lokal</button></div>`;$('#d').onclick=()=>{if(confirm('Hapus semua data lokal?'))S.clear()}}
+
+/* ---------- Ilustrasi (SVG inline) ---------- */
+const SK='stroke="#0F172A" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"';
+const G=(x,y,s,b)=>`<g transform="translate(${x} ${y}) scale(${s})">${b}</g>`;
+const cat=(x,y,s=1)=>G(x,y,s,`<path d="M-30-40l10 16h40l10-16v46c0 22-14 34-30 34s-30-12-30-34z" fill="#fff" ${SK}/><circle cx="-12" cy="0" r="4" fill="#0F172A"/><circle cx="12" cy="0" r="4" fill="#0F172A"/><path d="M-4 10h8l-4 5z" fill="#EC4899" ${SK}/><path d="M-36 8h-14M-36 16l-13 5M36 8h14M36 16l13 5" ${SK} fill="none"/>`);
+const dog=(x,y,s=1)=>G(x,y,s,`<path d="M-26-26c-18-2-22 26-16 42 6 4 12-2 14-12zM26-26c18-2 22 26 16 42-6 4-12-2-14-12z" fill="#38BDF8" ${SK}/><ellipse cx="0" cy="4" rx="28" ry="32" fill="#fff" ${SK}/><circle cx="-11" cy="-4" r="4" fill="#0F172A"/><circle cx="11" cy="-4" r="4" fill="#0F172A"/><ellipse cx="0" cy="12" rx="7" ry="5" fill="#0F172A"/><path d="M-5 20q5 12 10 0" fill="#EC4899" ${SK}/>`);
+const kid=(x,y,s=1)=>G(x,y,s,`<path d="M-28 52v-12c0-14 12-22 28-22s28 8 28 22v12z" fill="#EC4899" ${SK}/><circle cx="0" cy="-4" r="22" fill="#FCD9B6" ${SK}/><path d="M-22-8c4-16 40-16 44 0-12-6-32-6-44 0z" fill="#0F172A"/><circle cx="-8" cy="0" r="3" fill="#0F172A"/><circle cx="8" cy="0" r="3" fill="#0F172A"/><path d="M-6 10q6 5 12 0" fill="none" ${SK}/>`);
+const germ=(x,y,c,s=1)=>G(x,y,s,`<g stroke="${c}" stroke-width="3" stroke-linecap="round">${[0,60,120].map(a=>`<path d="M-13 0h26" transform="rotate(${a})"/>`).join('')}</g><circle r="8" fill="${c}"/><circle r="3" fill="#fff"/>`);
+const litter=(x,y,s=1)=>G(x,y,s,`<path d="M-34-6h68l-8 26h-52z" fill="#E9D5FF" ${SK}/><path d="M-26-6q26-16 52 0" fill="#fff" ${SK}/><circle cx="-8" cy="8" r="3" fill="#7C5CE0"/><circle cx="10" cy="12" r="3" fill="#7C5CE0"/>`);
+const soil=(x,y,s=1)=>G(x,y,s,`<path d="M-50 20q50-20 100 0v10h-100z" fill="#A7F3D0" ${SK}/><path d="M-20 8v-18M-20-4q-10-6-12-14M-20-4q10-6 12-14M24 10v-14M24 2q-8-4-9-12" fill="none" stroke="#0F766E" stroke-width="3.5" stroke-linecap="round"/>`);
+const IL={
+hero:()=>`<svg class="il" viewBox="0 0 400 340" role="img" aria-label="Ilustrasi rumah dengan kucing, anjing, anak, dan mikroorganisme melayang"><circle cx="200" cy="170" r="160" fill="#DBEAFE"/><path d="M60 170L200 60l140 110v110H60z" fill="#fff" ${SK}/><path d="M50 176L200 56l150 120" fill="none" stroke="#1D4ED8" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><g class="fl">${cat(130,225,1.05)}</g><g class="fl2">${dog(270,225,1)}</g>${kid(200,235,.8)}<g class="par" data-p="-.06">${germ(70,90,'#EC4899',1.1)}${germ(335,70,'#7C5CE0',1)}</g><g class="par" data-p=".05">${germ(330,200,'#38BDF8',.9)}${germ(45,230,'#38BDF8',.8)}${germ(200,40,'#EC4899',.8)}</g><path d="M40 300h320" stroke="#1D4ED8" stroke-width="4" stroke-linecap="round"/></svg>`,
+oh:()=>`<svg class="il" viewBox="0 0 400 350" role="group" aria-label="Diagram One Health: hewan, manusia, lingkungan"><g fill="none" stroke="#EC4899" stroke-width="4" class="ln"><path d="M148 70Q205 40 262 70"/><path d="M110 138Q130 220 165 262"/><path d="M290 138Q270 220 235 262"/></g><g class="nd" tabindex="0" role="button" aria-pressed="false" data-n="Hewan" aria-label="Hewan"><circle class="bg" cx="90" cy="90" r="58"/>${cat(90,92,.8)}<text x="90" y="172" text-anchor="middle" font-size="15" font-weight="600">Hewan</text></g><g class="nd" tabindex="0" role="button" aria-pressed="false" data-n="Manusia" aria-label="Manusia"><circle class="bg" cx="310" cy="90" r="58"/>${kid(310,84,.8)}<text x="310" y="172" text-anchor="middle" font-size="15" font-weight="600">Manusia</text></g><g class="nd" tabindex="0" role="button" aria-pressed="false" data-n="Lingkungan" aria-label="Lingkungan"><circle class="bg" cx="200" cy="270" r="58"/>${soil(200,262,.7)}${litter(225,284,.45)}<text x="200" y="345" text-anchor="middle" font-size="15" font-weight="600">Lingkungan</text></g></svg>`,
+stage:i=>[`<svg class="il" viewBox="0 0 300 220" role="img" aria-label="Kucing mengeluarkan agen ke litter box dan tanah">${cat(80,100,1.3)}<g class="fl">${germ(150,70,'#EC4899',.8)}${germ(175,100,'#7C5CE0',.7)}</g>${litter(235,150,1.1)}${germ(235,128,'#38BDF8',.7)}<path d="M20 200h260" stroke="#1D4ED8" stroke-width="4" stroke-linecap="round"/></svg>`,
+`<svg class="il" viewBox="0 0 300 220" role="img" aria-label="Tangan yang tercemar menyentuh mulut anak">${kid(130,100,1.7)}<circle cx="205" cy="120" r="13" fill="#FCD9B6" ${SK}/><g class="fl">${germ(215,92,'#EC4899',.7)}</g><path d="M195 124Q170 135 150 128" fill="none" stroke="#EC4899" stroke-width="4" class="ln"/></svg>`,
+`<svg class="il" viewBox="0 0 300 220" role="img" aria-label="Perisai kebersihan melindungi anak; paparan belum tentu infeksi">${kid(100,100,1.5)}<path d="M205 50l50 16v50c0 34-22 52-50 62-28-10-50-28-50-62V66z" fill="#EFF6FF" ${SK}/><path d="M184 112l16 16 28-32" fill="none" stroke="#0F766E" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>${germ(160,40,'#EC4899',.7)}</svg>`][i],
+agent:d=>{const m={dermatofitosis:`<circle cx="100" cy="100" r="80" fill="#FCD9B6" ${SK}/><circle cx="100" cy="100" r="36" fill="none" stroke="#EC4899" stroke-width="8" stroke-dasharray="10 6"/><circle cx="100" cy="100" r="18" fill="#FDF2F8"/><path d="M30 60l16 8M160 50l-10 14M36 150l16-6M150 156l-12-10" stroke="#0F172A" stroke-width="3" stroke-linecap="round"/>`,
+toksokariasis:`<ellipse cx="100" cy="100" rx="64" ry="50" fill="#BAE6FD" ${SK}/><path d="M60 100q20-30 40 0t40 0" fill="none" stroke="#0EA5E9" stroke-width="9" stroke-linecap="round"/><circle cx="144" cy="100" r="5" fill="#0F172A"/>`,
+toksoplasmosis:`<circle cx="100" cy="100" r="68" fill="#EDE9FE" ${SK}/><ellipse cx="78" cy="100" rx="22" ry="36" fill="#7C5CE0" opacity=".85"/><ellipse cx="124" cy="100" rx="22" ry="36" fill="#7C5CE0" opacity=".85"/><circle cx="78" cy="92" r="5" fill="#fff"/><circle cx="124" cy="92" r="5" fill="#fff"/>`};
+return `<figure class="agent"><svg viewBox="0 0 200 200" role="img" aria-label="Ilustrasi skematis ${d.sci}">${m[d.slug]}</svg><figcaption>Ilustrasi skematis <i>${d.sci}</i> (tidak berskala)</figcaption></figure>`},
+flow:d=>`<div class="flow" role="list" aria-label="Alur penularan">${d.trans.map((t,i)=>`<div class="fs" role="listitem"><b>Tahap ${i+1}</b>${t}</div>`).join('<span class="ar" aria-hidden="true">➜</span>')}</div>`};
+/* ---------- Efek scroll ---------- */
+const RM=matchMedia('(prefers-reduced-motion:reduce)');let io,tk=0;
+function fx(){io&&io.disconnect();io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+$$('.card,.panel,.ch h1,.ch h2,.ch .lead,.detail section,.agent,.flow,.il').forEach((e,i)=>{e.classList.add('rv');e.style.setProperty('--d',(i%4)*90+'ms');io.observe(e)});tick()}
+function tick(){const y=scrollY,h=document.documentElement.scrollHeight-innerHeight;$('#pb').style.transform=`scaleX(${h>0?y/h:0})`;
+if(!RM.matches)$$('.par').forEach(g=>g.style.transform=`translateY(${y*g.dataset.p}px)`);
+const t=$('#bab4.tall');if(t&&window._st&&innerWidth>800){const r=t.getBoundingClientRect(),p=Math.min(.999,Math.max(0,-r.top/(r.height-innerHeight))),i=Math.floor(p*3);if(i!==window._cur){window._st(i);$$('.tab').forEach((b,j)=>b.setAttribute('aria-selected',j==i))}}}
+addEventListener('scroll',()=>{tk||(tk=requestAnimationFrame(()=>{tk=0;tick()}))},{passive:true});
+/* ---------- Router ---------- */
+function route(){const h=(location.hash||'#home').slice(1);if(/^bab\d$/.test(h))return;
+const [r,...p]=h.split('-');const page=r==='entri'?'entri':r;
+({home,ensiklopedi:ensi,entri:()=>detail(p.join('-')),pengingat,skrining,tentang}[page]||home)();
+$$('nav a').forEach(a=>a.removeAttribute('aria-current'));const act=page==='entri'?'ensiklopedi':page;$$(`nav a[href="#${act}"]`).forEach(a=>a.setAttribute('aria-current','page'));
+scrollTo(0,0);fx();if(page!=='home')$('#main').focus({preventScroll:true})}
+$('nav.top').innerHTML=NAV.map(n=>`<a href="#${n[0]}">${n[1]}</a>`).join('');
+$('nav.bot').innerHTML=NAV.slice(0,4).map(n=>`<a href="#${n[0]}">${n[1]}</a>`).join('');
+addEventListener('hashchange',route);route();
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+/* Status & TODO: lihat HANDOFF.md */
+</script></body></html>

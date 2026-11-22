@@ -1,0 +1,24 @@
+{
+  "name": "ZoonoCheck — Ensiklopedi zoonosis untuk rumah yang hidup",
+  "short_name": "ZoonoCheck",
+  "lang": "id",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FBF6EA",
+  "theme_color": "#FBF6EA",
+  "description": "Ensiklopedi zoonosis pada kucing, anjing, manusia, dan lingkungan rumah. Skrining risiko, checklist, dan pengingat yang tersimpan di perangkat.",
+  "categories": ["education", "health", "medical"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Skrining risiko", "url": "./index.html#skrining", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Ensiklopedi", "url": "./index.html#ensiklopedi", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Pengingat", "url": "./index.html#pengingat", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

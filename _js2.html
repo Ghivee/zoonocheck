@@ -1,0 +1,649 @@
+/* ============================================================
+   ILLUSTRATION SYSTEM — flat ink + paper, built to feel drawn
+   ============================================================ */
+const INK = '#2A0F1C', PAPER = '#FFF8EF', PAPER2 = '#FBF6EA', PINK = '#EE5B6C', BLUE = '#2B59D8', LAV = '#7C5CE0', SKY = '#1C9C96', MOSS = '#1C9C96', AMBER = '#B96A0C';
+const AMBER2 = '#FFD27A', CREAM = '#FBF6EA', TEAL2 = '#7FD6CF';
+const st = (w = 2.4, c = INK) => `stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"`;
+const fillSt = (f = PAPER, w = 2.4, c = INK) => `fill="${f}" ${st(w, c)}`;
+const svg = (vb, label, body, cls = '') => `<svg class="art ${cls}" viewBox="${vb}" ${label ? `role="img" aria-label="${esc(label)}"` : 'aria-hidden="true"'} xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+const g = (x, y, s, body) => `<g transform="translate(${x} ${y}) scale(${s})">${body}</g>`;
+
+const cat = (x, y, s = 1, o = {}) => g(x, y, s, `
+  <path d="M20 44q24 6 21-18" fill="none" ${st(2.4)}/>
+  <path d="M-24 4c-10 14-10 34 4 44h40c14-10 14-30 4-44-10-12-38-12-48 0Z" fill="${o.fill || PAPER}" ${st()}/>
+  <path d="M-24-10-33-33-13-23Z" fill="${o.fill || PAPER}" ${st()}/>
+  <path d="M24-10 33-33 13-23Z" fill="${o.fill || PAPER}" ${st()}/>
+  <circle cx="0" cy="-14" r="20" fill="${o.fill || PAPER}" ${st()}/>
+  <circle cx="-7" cy="-16" r="2.4" fill="${INK}"/><circle cx="7" cy="-16" r="2.4" fill="${INK}"/>
+  <path d="M-3-9 3-9 0-5Z" fill="${o.nose || PINK}" ${st(1.6)}/>
+  <path d="M0-4q-5 5-9 1M0-4q5 5 9 1" fill="none" ${st(1.6)}/>
+  <path d="M-20-12h-10M-20-7l-10 2M20-12h10M20-7l10 2" ${st(1.6)}/>
+  <path d="M-9 48v8M9 48v8" ${st()}/>
+  ${o.patch ? `<path d="M${(o.px || -14) - 10} ${o.py || 22}q10-11 20 0t-2 18q-12 6-18-4t0-14Z" fill="${o.patch}" ${st(2)}/>` : ''}
+  ${o.belly ? `<ellipse cx="0" cy="28" rx="17" ry="12" fill="${o.belly}" opacity=".85"/>` : ''}
+`);
+
+const dog = (x, y, s = 1, o = {}) => g(x, y, s, `
+  <path d="M22 36q24 0 18-20" fill="none" ${st(2.6)}/>
+  <path d="M-28 14c0-18 12-28 28-28s28 10 28 28v14c0 18-12 28-28 28S-28 46-28 28Z" fill="${o.fill || PAPER}" ${st()}/>
+  <path d="M-22 50v8M22 50v8" ${st()}/>
+  <ellipse cx="-27" cy="-17" rx="10" ry="22" fill="${o.ear || '#38BDF8'}" ${st()}/>
+  <ellipse cx="27" cy="-17" rx="10" ry="22" fill="${o.ear || '#38BDF8'}" ${st()}/>
+  <circle cx="0" cy="-18" r="22" fill="${o.fill || PAPER}" ${st()}/>
+  <ellipse cx="0" cy="-5" rx="14" ry="10" fill="${o.snout || '#E8DCC4'}" ${st(2)}/>
+  <circle cx="-8" cy="-20" r="2.5" fill="${INK}"/><circle cx="8" cy="-20" r="2.5" fill="${INK}"/>
+  <ellipse cx="0" cy="-9" rx="4" ry="3" fill="${INK}"/>
+  <path d="M0-6v4m0 0q-5 5-9 0m9 0q5 5 9 0" fill="none" ${st(1.8)}/>
+  <path d="M-6 6q6 10 12 0" fill="${PINK}" ${st(1.8)}/>
+  ${o.patch ? `<circle cx="${o.px || 14}" cy="${o.py || 26}" r="${o.pr || 10}" fill="${o.patch}" ${st(2)}/>` : ''}
+  ${o.belly ? `<ellipse cx="0" cy="28" rx="16" ry="13" fill="${o.belly}" opacity=".85"/>` : ''}
+`);
+
+const person = (x, y, s = 1, o = {}) => g(x, y, s, `
+  <path d="M-11 26v22M11 26v22" fill="none" stroke="${o.pants || INK}" stroke-width="9" stroke-linecap="round"/>
+  <path d="M-20 4q0-14 20-14t20 14v24q0 12-20 12T-20 28Z" fill="${o.shirt || BLUE}" ${st()}/>
+  ${o.pregnant ? `<path d="M-18 12q-8 20 6 30t26 0 6-30" fill="${o.shirt || BLUE}" ${st()}/><path d="M-8 18q8 10 18 4" fill="none" ${st(2)}/>` : ''}
+  <path d="M-20 8q-12 8-12 20M20 8q12 8 12 20" fill="none" ${st(2.6)}/>
+  <circle cx="-32" cy="30" r="4" fill="${o.skin || '#F2C9A0'}" ${st(1.6)}/>
+  <circle cx="32" cy="30" r="4" fill="${o.skin || '#F2C9A0'}" ${st(1.6)}/>
+  <circle cx="0" cy="-28" r="16" fill="${o.skin || '#F2C9A0'}" ${st()}/>
+  <path d="M-15-32q3-15 15-15t15 15q-15-6-30 0Z" fill="${o.hair || INK}" ${st(2)}/>
+  <circle cx="-5" cy="-29" r="1.9" fill="${INK}"/><circle cx="5" cy="-29" r="1.9" fill="${INK}"/>
+  <path d="M-5-21q5 4 10 0" fill="none" ${st(1.7)}/>
+  ${o.patch ? `<path d="M${o.px || -14} ${o.py || 14}q7-8 14 0t-1 12q-8 4-12-2t-1-10Z" fill="${o.patch}" ${st(1.8)}/>` : ''}
+  ${o.scarf ? `<path d="M-16-12q16 9 32 0" fill="none" stroke="${o.scarf}" stroke-width="7" stroke-linecap="round"/>` : ''}
+  ${o.bag ? `<path d="M-34 20h14v18h-14z" fill="${o.bag}" ${st(2)}/>` : ''}
+`);
+
+const child = (x, y, s = 1, o = {}) => person(x, y, s, { shirt: '#EC4899', pants: '#12211D', skin: '#F2C9A0', ...o });
+
+const spore = (x, y, c = PINK, s = 1) => g(x, y, s, `
+  <g stroke="${c}" stroke-width="2.4" stroke-linecap="round">
+    <path d="M-13 0h26M0-13v26M-9-9l18 18M9-9-9 9"/>
+  </g>
+  <circle r="8" fill="${c}" ${st(2)}/><circle r="3" fill="${PAPER}"/>
+`);
+
+const worm = (x, y, c = SKY, s = 1) => g(x, y, s, `
+  <path d="M-26-14q22-18 34 4t-12 26q-20 8-24-10t18-16 18 12" fill="none" stroke="${c}" stroke-width="7" stroke-linecap="round"/>
+  <path d="M-26-14q22-18 34 4t-12 26q-20 8-24-10t18-16 18 12" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round" opacity=".55" stroke-dasharray="3 7"/>
+  <circle cx="-27" cy="-14" r="4" fill="${c}" ${st(1.8)}/>
+`);
+
+const oocyst = (x, y, c = LAV, s = 1) => g(x, y, s, `
+  <circle r="15" fill="${c}" opacity=".2" ${st(2.2, c)}/>
+  <path d="M-6-8q10-4 12 5t-7 12-11-5 6-12Z" fill="${c}" ${st(1.4, INK)}/>
+  <path d="M6-2q8 2 5 9" fill="none" ${st(2.4, c)}/>
+  <circle cx="4" cy="5" r="2" fill="${PAPER}"/>
+`);
+
+const plant = (x, y, s = 1, c = MOSS) => g(x, y, s, `
+  <path d="M-18 12h36l-5 22h-26z" fill="#E9D5FF" ${st()}/>
+  <path d="M0 12V-18M0-6q-12-2-14-14M0-6q12-2 14-14M0 2q-10 0-12-8M0 2q10 0 12-8" fill="none" stroke="${c}" stroke-width="3.2" stroke-linecap="round"/>
+`);
+
+const litter = (x, y, s = 1, c = LAV) => g(x, y, s, `
+  <path d="M-32-8h64l-7 28h-50z" fill="#E9D5FF" ${st()}/>
+  <path d="M-27-8q27-15 54 0" fill="${PAPER}" ${st()}/>
+  <path d="M-22 8q22-8 44 0" fill="none" stroke="${c}" stroke-width="2.2" stroke-dasharray="3 5"/>
+  <circle cx="-8" cy="6" r="2.6" fill="${c}"/><circle cx="9" cy="10" r="2.2" fill="${c}"/>
+`);
+
+const bowl = (x, y, s = 1, c = SKY) => g(x, y, s, `
+  <ellipse cx="0" cy="0" rx="26" ry="9" fill="${c}" opacity=".25" ${st()}/>
+  <path d="M-22 0q4 16 22 16T22 0" fill="${PAPER}" ${st()}/>
+  <ellipse cx="0" cy="0" rx="22" ry="7" fill="${c}" opacity=".6"/>
+`);
+
+const soil = (x, y, s = 1) => g(x, y, s, `
+  <path d="M-58 18q58-24 116 0v10h-116z" fill="#D1FAE5" ${st()}/>
+  <path d="M-26 8V-10M-26 0q-10-4-12-12M-26 0q10-4 12-12M20 10V-4M20 2q-8-2-9-9M20 2q8-2 9-9" fill="none" stroke="${MOSS}" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="-38" cy="18" r="3" fill="${AMBER}" opacity=".6"/><circle cx="38" cy="20" r="2.4" fill="${AMBER}" opacity=".6"/>
+`);
+
+const bed = (x, y, s = 1, c = PINK) => g(x, y, s, `
+  <rect x="-44" y="-24" width="88" height="52" rx="8" fill="${PAPER}" ${st()}/>
+  <path d="M-44 4h88" ${st(2)}/>
+  <rect x="-34" y="-18" width="28" height="18" rx="6" fill="${c}" opacity=".35" ${st(2)}/>
+  <path d="M-8-14q24-8 40 4v12H-8z" fill="${c}" opacity=".25" ${st(2)}/>
+`);
+
+const sofa = (x, y, s = 1, c = BLUE) => g(x, y, s, `
+  <path d="M-52-10q0-14 14-14h76q14 0 14 14v20q0 10-10 10h-84q-10 0-10-10Z" fill="${c}" opacity=".25" ${st()}/>
+  <path d="M-58 4q-8 0-8 10v16h8M58 4q8 0 8 10v16h-8" fill="${PAPER}" ${st()}/>
+  <path d="M-40-20v26M40-20v26" ${st(2)}/>
+  <rect x="-36" y="6" width="72" height="16" rx="5" fill="${PAPER}" ${st(2)}/>
+`);
+
+const counter = (x, y, s = 1) => g(x, y, s, `
+  <path d="M-46-18h92v16h-92z" fill="${PAPER}" ${st()}/>
+  <path d="M-40-2v42M40-2v42M-40 20h80" ${st(2)}/>
+  <rect x="-30" y="-12" width="20" height="7" rx="2" fill="${SKY}" opacity=".5"/>
+  <circle cx="14" cy="-9" r="3" fill="${INK}"/><circle cx="26" cy="-9" r="3" fill="${INK}"/>
+`);
+
+const tree = (x, y, s = 1) => g(x, y, s, `
+  <path d="M0 60V-8" ${st(5)}/>
+  <path d="M0-8q-6-22 8-34M0-8q8-20-4-34" fill="none" ${st(3)}/>
+  <circle cx="-24" cy="-26" r="20" fill="#D1FAE5" ${st()}/>
+  <circle cx="24" cy="-30" r="24" fill="#A7F3D0" ${st()}/>
+  <circle cx="0" cy="-52" r="26" fill="#D1FAE5" ${st()}/>
+`);
+
+const fence = (x, y, s = 1) => g(x, y, s, `
+  <path d="M-50 20h100" ${st(3)}/>
+  <path d="M-40 20V-14M-12 20V-14M16 20V-14M44 20V-14" ${st(3)}/>
+  <path d="M-46 2h92M-46 12h92" ${st(2)}/>
+`);
+
+const sun = (x, y, s = 1) => g(x, y, s, `
+  <circle r="24" fill="#FEF3C7" ${st(2.6)}/>
+  <g stroke="${AMBER}" stroke-width="2.4" stroke-linecap="round">
+    <path d="M0-36v-8M0 36v8M-36 0h-8M36 0h8M-25-25l-6-6M25 25l6 6M25-25l6-6M-25 25l-6 6"/>
+  </g>
+`);
+
+const arrow = (x, y, s = 1, c = INK) => g(x, y, s, `
+  <path d="M-22 0h38M4-8l12 8-12 8" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+`);
+
+const labelTag = (x, y, text, c = INK, anchor = 'start', rot = 0) => `
+  <g transform="translate(${x} ${y}) rotate(${rot})">
+    <rect x="${anchor === 'end' ? -text.length * 6.1 - 10 : -6}" y="-12" width="${text.length * 6.1 + 16}" height="22" rx="4" fill="${PAPER}" ${st(1.4, c)}/>
+    <text x="${anchor === 'end' ? -text.length * 6.1 - 1 : 1}" y="3" font-family="monospace" font-size="8" letter-spacing="1" fill="${c}" text-anchor="${anchor}">${text}</text>
+  </g>`;
+
+const sceneBg = (w = 520, h = 360, c = '#FCE7F3') => `
+  <rect x="0" y="0" width="${w}" height="${h}" rx="14" fill="${PAPER}"/>
+  <path d="M0 ${h - 54}H${w}" stroke="${INK}" stroke-width="2.4" opacity=".35"/>
+  <circle cx="${w - 70}" cy="62" r="42" fill="${c}" opacity=".8"/>
+  <g fill="${INK}" opacity=".16">${Array.from({ length: 18 }, (_, i) => `<circle cx="${30 + (i * 47) % (w - 60)}" cy="${24 + (i * 31) % (h - 110)}" r="1.4"/>`).join('')}</g>
+`;
+
+/* ---------- the illustrations ---------- */
+const ART = {
+  kunang({ mood = 'happy', arms = true, lens = false } = {}) {
+    const sleepy = mood === 'sleepy';
+    return svg('0 0 220 220', 'Kunang, kunang-kunang pemandu ZoonoCheck', `
+      <ellipse cx="110" cy="198" rx="54" ry="7" fill="${INK}" opacity=".14"/>
+      <circle class="k-glow" cx="110" cy="112" r="82" fill="${AMBER2}" opacity=".34"/>
+      <g class="k-wing k-wing-l">
+        <path d="M82 92C56 64 22 70 26 102c3 26 30 34 58 16Z" fill="${TEAL2}" opacity=".72" ${st(3.4)}/>
+        <path d="M74 98C54 84 38 84 38 100c0 13 16 19 38 10" fill="none" stroke="${PAPER}" stroke-width="3" stroke-linecap="round" opacity=".65"/>
+      </g>
+      <g class="k-wing k-wing-r">
+        <path d="M138 92c26-28 60-22 56 10-3 26-30 34-58 16Z" fill="${TEAL2}" opacity=".72" ${st(3.4)}/>
+        <path d="M146 98c20-14 36-14 36 2 0 13-16 19-38 10" fill="none" stroke="${PAPER}" stroke-width="3" stroke-linecap="round" opacity=".65"/>
+      </g>
+      ${arms ? `
+        <g class="k-arm k-arm-l"><path d="M52 132C38 140 34 154 40 166" fill="none" ${st(9)}/><path d="M52 132C38 140 34 154 40 166" fill="none" stroke="${AMBER2}" stroke-width="4" stroke-linecap="round"/></g>
+        <g class="k-arm k-arm-r"><path d="M168 132C182 140 186 154 180 166" fill="none" ${st(9)}/><path d="M168 132C182 140 186 154 180 166" fill="none" stroke="${AMBER2}" stroke-width="4" stroke-linecap="round"/></g>` : ''}
+      <g class="k-body">
+        <g class="k-antenna k-antenna-l"><path d="M88 50C84 34 78 26 70 20" fill="none" ${st(4.4)}/><circle cx="68" cy="17" r="6" fill="${PINK}" ${st(3.4)}/></g>
+        <g class="k-antenna k-antenna-r"><path d="M132 50c4-16 10-24 18-30" fill="none" ${st(4.4)}/><circle cx="152" cy="17" r="6" fill="${PINK}" ${st(3.4)}/></g>
+        <path d="M110 40c42 0 68 34 68 76 0 42-30 70-68 70s-68-28-68-70c0-42 26-76 68-76Z" fill="${AMBER2}" ${st(5)}/>
+        <path d="M110 52c33 0 54 27 54 62 0 35-24 58-54 58s-54-23-54-58c0-35 21-62 54-62Z" fill="${CREAM}" opacity=".92"/>
+        <path d="M54 84c6-18 22-30 42-32" fill="none" stroke="${PAPER}" stroke-width="7" stroke-linecap="round" opacity=".8"/>
+        <ellipse class="k-cheek" cx="64" cy="132" rx="10" ry="6" fill="${PINK}"/>
+        <ellipse class="k-cheek" cx="156" cy="132" rx="10" ry="6" fill="${PINK}"/>
+        ${sleepy
+          ? `<path d="M74 108q14 10 28 0M118 108q14 10 28 0" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`
+          : `<g class="k-eyes">
+              <circle cx="88" cy="104" r="17" fill="${PAPER}" ${st(4.4)}/>
+              <circle cx="132" cy="104" r="17" fill="${PAPER}" ${st(4.4)}/>
+              <g class="k-pupil"><circle cx="88" cy="106" r="8.4" fill="${INK}"/><circle cx="132" cy="106" r="8.4" fill="${INK}"/>
+              <circle cx="91.5" cy="102.5" r="2.7" fill="${PAPER}"/><circle cx="135.5" cy="102.5" r="2.7" fill="${PAPER}"/></g>
+            </g>`}
+        <path class="k-squint" d="M74 108q14-14 28 0M118 108q14-14 28 0" fill="none" stroke="${INK}" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path class="k-smile" d="M94 136q16 14 32 0" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
+        <g class="k-open">
+          <path d="M94 133q16-5 32 0-1 22-16 24-15-2-16-24Z" fill="#4A0F22" ${st(4.2)}/>
+          <path d="M102 150q8-7 16 0-3 7-8 7.5-5-.5-8-7.5Z" fill="${PINK}"/>
+          <path d="M104 132.5h12v3.4a6 3.2 0 0 1-12 0Z" fill="${PAPER}"/>
+        </g>
+        <path d="M88 164q22 10 44 0" fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round" opacity=".22"/>
+        ${mood === 'wow' ? `<path d="M72 76l12-7M148 76l-12-7" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>` : ''}
+        ${lens ? `<g class="k-lens" transform="rotate(8 182 166)"><circle cx="182" cy="166" r="19" fill="${TEAL2}" opacity=".34" ${st(5)}/><circle cx="182" cy="166" r="13" fill="${PAPER}" opacity=".6" ${st(2.4)}/><path d="M195 179l17 17" ${st(7)}/></g>` : ''}
+      </g>
+      <text class="k-zzz" x="170" y="48" font-family="Bricolage Grotesque, sans-serif" font-weight="800" font-size="26" fill="${INK}">z</text>
+    `, 'kunang');
+  },
+
+  hero() {
+    return svg('0 0 640 560', 'Rumah dengan kucing, anjing, manusia, dan mikroorganisme yang melayang di sekitar rumah', `
+      <defs>
+        <pattern id="heroDots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.1" fill="${INK}" opacity=".14"/></pattern>
+        <clipPath id="lensClip"><circle cx="500" cy="120" r="72"/></clipPath>
+      </defs>
+      <circle cx="310" cy="290" r="245" fill="#FCE7F3" opacity=".62"/>
+      <circle cx="310" cy="290" r="245" fill="url(#heroDots)" opacity=".7"/>
+      <path d="M0 482h640" stroke="${INK}" stroke-width="3"/>
+      ${sun(566, 74, .9)}
+      ${tree(70, 430, .95)}
+      ${fence(470, 470, 1.1)}
+
+      <path d="M96 214 320 86l224 128" fill="${BLUE}" ${st(3.2)}/>
+      <path d="M120 208v262h400V208" fill="${PAPER}" ${st(3.2)}/>
+      <path d="M120 352h400M320 208v262" ${st(2.4)}/>
+      <rect x="322" y="210" width="196" height="140" fill="#E0F2FE" opacity=".55"/>
+      <rect x="122" y="354" width="196" height="114" fill="#FCE7F3" opacity=".45"/>
+      <rect x="322" y="354" width="196" height="114" fill="#EDE9FE" opacity=".5"/>
+
+      ${sofa(190, 322, .78, BLUE)}
+      ${cat(282, 320, .82, { patch: PINK, px: -14, py: 24 })}
+      <rect x="132" y="244" width="56" height="46" rx="4" fill="${PAPER}" ${st(2.2)}/>
+      <path d="M160 244v46M132 267h56" ${st(1.6)}/>
+      ${plant(292, 250, .55)}
+
+      ${counter(408, 262, .9)}
+      ${dog(466, 330, .78, { ear: '#38BDF8', patch: '#38BDF8', px: 12, py: 26, pr: 8 })}
+      ${bowl(408, 338, .6, SKY)}
+
+      ${bed(196, 424, .85, PINK)}
+      ${litter(426, 432, .9, LAV)}
+      <path d="M500 414h20" ${st(2.4)}/>
+      <path d="M520 414q10 0 10 10" fill="none" ${st(2.4)}/>
+
+      <path d="M426 398q30-40 68-22t34 62" fill="none" stroke="${PINK}" stroke-width="2.6" stroke-dasharray="5 8" stroke-linecap="round"/>
+      <circle cx="426" cy="398" r="11" fill="${PINK}" ${st(2)}/><text x="426" y="402" text-anchor="middle" font-family="monospace" font-size="9" fill="#fff">1</text>
+      <circle cx="494" cy="376" r="11" fill="${AMBER}" ${st(2)}/><text x="494" y="380" text-anchor="middle" font-family="monospace" font-size="9" fill="#fff">2</text>
+      <circle cx="528" cy="438" r="11" fill="${BLUE}" ${st(2)}/><text x="528" y="442" text-anchor="middle" font-family="monospace" font-size="9" fill="#fff">3</text>
+
+      <g class="float">${spore(64, 120, PINK, .85)}</g>
+      <g class="float2">${spore(590, 250, LAV, .7)}</g>
+      <g class="float3">${spore(88, 350, SKY, .6)}</g>
+      <g class="float">${worm(600, 360, SKY, .55)}</g>
+      <g class="float2">${oocyst(560, 190, LAV, .8)}</g>
+
+      <circle cx="500" cy="120" r="78" fill="${PAPER}" ${st(5)}/>
+      <g clip-path="url(#lensClip)">
+        <circle cx="500" cy="120" r="72" fill="#F5EFE2"/>
+        <g fill="${INK}" opacity=".15">${Array.from({ length: 14 }, (_, i) => `<circle cx="${456 + (i * 23) % 88}" cy="${88 + (i * 19) % 64}" r="1.3"/>`).join('')}</g>
+        ${spore(476, 102, PINK, 1)}
+        ${worm(518, 142, SKY, .72)}
+        ${oocyst(510, 94, LAV, .9)}
+      </g>
+      <path d="M556 176l42 42" stroke="${INK}" stroke-width="10" stroke-linecap="round"/>
+      <path d="M556 176l42 42" stroke="${PAPER2}" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+      <text x="500" y="214" text-anchor="middle" font-family="monospace" font-size="8" letter-spacing="2" fill="${INK}">AGEN · TIDAK TERLIHAT</text>
+
+      ${labelTag(142, 232, 'BULU', PINK, 'start', -4)}
+      <path d="M180 238q14-6 24 12" fill="none" ${st(1.4, PINK)} stroke-dasharray="3 4"/>
+      ${labelTag(566, 424, 'TANAH', MOSS, 'end', 3)}
+      <path d="M548 430q-10-10-18-6" fill="none" ${st(1.4, MOSS)} stroke-dasharray="3 4"/>
+      ${labelTag(360, 500, 'TANGAN', BLUE, 'start', 0)}
+      <path d="M390 496q12-8 20-20" fill="none" ${st(1.4, BLUE)} stroke-dasharray="3 4"/>
+    `);
+  },
+
+  oneHealth() {
+    const node = (id, x, y, c, soft, art, label) => `
+      <g class="oh-node" role="button" tabindex="0" aria-pressed="${id === 'hewan'}" aria-label="Baca penjelasan ${label}" data-node="${id}" style="--c:${c};--soft:${soft}">
+        <circle class="halo" cx="${x}" cy="${y}" r="98"/>
+        <circle class="ring" cx="${x}" cy="${y}" r="82"/>
+        ${art}
+        <text x="${x}" y="${y + 112}" text-anchor="middle">${label}</text>
+      </g>`;
+    return svg('0 0 600 520', 'Diagram One Health: hewan, manusia, dan lingkungan saling terhubung', `
+      <defs><pattern id="ohDots" width="15" height="15" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.1" fill="${INK}" opacity=".13"/></pattern></defs>
+      <rect width="600" height="520" rx="18" fill="${PAPER2}"/>
+      <rect width="600" height="520" rx="18" fill="url(#ohDots)"/>
+      <g fill="none" stroke="${PINK}" stroke-width="2.2" stroke-dasharray="5 8" opacity=".8">
+        <path d="M150 150Q300 52 450 150"/>
+        <path d="M150 150Q108 340 300 390"/>
+        <path d="M450 150Q492 340 300 390"/>
+      </g>
+      <g>
+        <circle r="4" fill="${PINK}"><animateMotion dur="7s" repeatCount="indefinite" path="M150 150Q300 52 450 150"/></circle>
+        <circle r="4" fill="${BLUE}"><animateMotion dur="8s" repeatCount="indefinite" path="M450 150Q492 340 300 390"/></circle>
+        <circle r="4" fill="${LAV}"><animateMotion dur="9s" repeatCount="indefinite" path="M300 390Q108 340 150 150"/></circle>
+      </g>
+      <text x="300" y="252" text-anchor="middle" font-family="monospace" font-size="9" letter-spacing="2.5" fill="${INK}" opacity=".55">SATU</text>
+      <text x="300" y="272" text-anchor="middle" font-family="monospace" font-size="9" letter-spacing="2.5" fill="${INK}" opacity=".55">KESEHATAN</text>
+      ${node('hewan', 150, 150, PINK, '#FCE7F3', cat(150, 165, .95, { patch: PINK, px: -15, py: 24 }), 'Hewan')}
+      ${node('manusia', 450, 150, BLUE, '#DCE7FF', person(450, 160, 1.05, { shirt: BLUE }), 'Manusia')}
+      ${node('lingkungan', 300, 390, LAV, '#EDE9FE', `${soil(300, 398, .75)}${litter(348, 414, .55, LAV)}`, 'Lingkungan')}
+      <g class="float">${spore(58, 70, PINK, .6)}</g>
+      <g class="float2">${oocyst(548, 84, LAV, .7)}</g>
+      <g class="float3">${worm(72, 452, SKY, .5)}</g>
+    `);
+  },
+
+  houseMap() {
+    const hotspot = r => `
+      <g class="hotspot" role="button" tabindex="0" aria-pressed="${r.id === 'litter'}" aria-label="${r.name}: ${r.risk.join(', ')}" data-room="${r.id}" style="--c:${r.color};--soft:${r.soft}">
+        <circle class="hit" cx="${r.x}" cy="${r.y}" r="34"/>
+        <circle class="pulse" cx="${r.x}" cy="${r.y}" r="18"/>
+        <circle class="ring" cx="${r.x}" cy="${r.y}" r="16"/>
+        <text class="num" x="${r.x}" y="${r.y + 1}">${r.num}</text>
+      </g>`;
+    return svg('0 0 640 460', 'Denah rumah dengan lima titik risiko: litter box, dapur, halaman, kamar, dan ruang bermain', `
+      <defs><pattern id="mapDots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="${INK}" opacity=".12"/></pattern></defs>
+      <rect x="20" y="20" width="600" height="420" rx="8" fill="${PAPER}" ${st(6)}/>
+      <rect x="26" y="26" width="588" height="408" fill="url(#mapDots)"/>
+      <rect x="26" y="26" width="274" height="214" fill="#FCE7F3" opacity=".55"/>
+      <rect x="300" y="26" width="314" height="214" fill="#E0F2FE" opacity=".55"/>
+      <rect x="26" y="240" width="174" height="194" fill="#FCE7F3" opacity=".4"/>
+      <rect x="200" y="240" width="220" height="194" fill="#EDE9FE" opacity=".5"/>
+      <rect x="420" y="240" width="194" height="194" fill="#D1FAE5" opacity=".6"/>
+      <path d="M300 26v408M26 240h588M200 240v194M420 240v194" ${st(4)}/>
+
+      ${sofa(120, 150, .9, BLUE)}
+      <rect x="54" y="190" width="96" height="30" rx="4" fill="${PAPER}" ${st(2)}/>
+      ${cat(250, 172, .7, { patch: PINK, px: -14, py: 22 })}
+      ${plant(74, 86, .65)}
+      <rect x="204" y="58" width="54" height="34" rx="3" fill="${PAPER}" ${st(2)}/>
+      <path d="M231 58v34M204 75h54" ${st(1.4)}/>
+
+      ${counter(392, 78, 1)}
+      <rect x="502" y="52" width="54" height="72" rx="5" fill="${PAPER}" ${st(2)}/>
+      <path d="M516 52v72M542 52v72" ${st(1.4)}/>
+      ${dog(486, 188, .7, { ear: '#38BDF8' })}
+      ${bowl(392, 186, .7, SKY)}
+
+      ${bed(104, 332, 1, PINK)}
+      <rect x="152" y="300" width="34" height="30" rx="3" fill="${PAPER}" ${st(2)}/>
+      ${litter(310, 352, 1.1, LAV)}
+      <path d="M236 390h128" ${st(2)} stroke-dasharray="4 6"/>
+      <path d="M236 390q64-26 128 0" fill="none" ${st(1.6, LAV)} stroke-dasharray="3 6"/>
+
+      ${soil(520, 372, 1)}
+      <circle cx="472" cy="314" r="12" fill="${PAPER}" ${st(2)}/>
+      <path d="M464 314h16M472 306v16" ${st(1.4)}/>
+      <path d="M430 410h150" ${st(2)} stroke-dasharray="5 7"/>
+      ${plant(578, 310, .55)}
+
+      <path d="M286 240v34" ${st(2)} stroke-dasharray="4 5"/>
+      <path d="M286 274q0 10 10 10" fill="none" ${st(2)}/>
+      <path d="M400 240v30" ${st(2)} stroke-dasharray="4 5"/>
+
+      <text x="58" y="46" font-family="monospace" font-size="8" letter-spacing="1.5" fill="${INK}" opacity=".5">RUANG</text>
+      <text x="322" y="46" font-family="monospace" font-size="8" letter-spacing="1.5" fill="${INK}" opacity=".5">DAPUR</text>
+      <text x="58" y="262" font-family="monospace" font-size="8" letter-spacing="1.5" fill="${INK}" opacity=".5">KAMAR</text>
+      <text x="222" y="262" font-family="monospace" font-size="8" letter-spacing="1.5" fill="${INK}" opacity=".5">LITTER</text>
+      <text x="442" y="262" font-family="monospace" font-size="8" letter-spacing="1.5" fill="${INK}" opacity=".5">HALAMAN</text>
+
+      <g transform="translate(590 54)">
+        <path d="M0 16V-8M0-8l-5 7M0-8l5 7" fill="none" ${st(1.6)}/>
+        <text x="0" y="26" text-anchor="middle" font-family="monospace" font-size="7" fill="${INK}" opacity=".55">N</text>
+      </g>
+
+      ${ROOMS.map(hotspot).join('')}
+    `);
+  },
+
+  agent(slug) {
+    const d = E(slug);
+    const specimen = {
+      dermatofitosis: `
+        <path d="M150 84q34-16 52 12t-4 54q-12 28-46 30t-44-22 4-50 38-24Z" fill="${PINK}" opacity=".22" ${st(2.6, d.deep)}/>
+        <path d="M126 112q18-14 38-2t10 34-30 18-26-18 8-32Z" fill="none" ${st(2.2, d.deep)} stroke-dasharray="5 6"/>
+        <g stroke="${d.deep}" stroke-width="2.2" stroke-linecap="round">
+          <path d="M150 128q-20-18-34-14M150 128q22-20 36-10M150 128q-18 22-30 30M150 128q24 18 34 30M150 128q-4-26 2-40M150 128q10 24 8 38"/>
+        </g>
+        <circle cx="150" cy="128" r="7" fill="${d.deep}"/>
+        <circle cx="112" cy="146" r="3.4" fill="${d.deep}"/><circle cx="190" cy="154" r="3" fill="${d.deep}"/><circle cx="184" cy="94" r="2.6" fill="${d.deep}"/>
+        <circle cx="118" cy="98" r="2.4" fill="${d.deep}"/><circle cx="206" cy="120" r="2.2" fill="${d.deep}"/>
+      `,
+      toksokariasis: `
+        <path d="M150 78q42-18 54 18t-18 60q-26 24-54 2t-16-52 34-28Z" fill="${SKY}" opacity=".16" ${st(2.4, d.deep)}/>
+        <path d="M128 104q30-24 44 2t-16 40q-24 12-32-10t4-32 26-12 20 18" fill="none" stroke="${d.deep}" stroke-width="8" stroke-linecap="round"/>
+        <path d="M128 104q30-24 44 2t-16 40q-24 12-32-10t4-32 26-12 20 18" fill="none" stroke="${INK}" stroke-width="1.6" stroke-linecap="round" opacity=".45" stroke-dasharray="3 7"/>
+        <circle cx="127" cy="103" r="4.6" fill="${d.deep}" ${st(1.6)}/>
+        <circle cx="106" cy="154" r="2.6" fill="${AMBER}" opacity=".7"/><circle cx="190" cy="90" r="2.2" fill="${AMBER}" opacity=".7"/>
+        <circle cx="198" cy="156" r="2.6" fill="${AMBER}" opacity=".7"/>
+      `,
+      toksoplasmosis: `
+        <circle cx="150" cy="128" r="52" fill="${LAV}" opacity=".16" ${st(2.6, d.deep)}/>
+        <path d="M128 108q26-14 34 8t-16 34-30-8 12-34Z" fill="${d.deep}" opacity=".8" ${st(2, d.deep)}/>
+        <path d="M156 104q18 6 14 24" fill="none" ${st(4, d.deep)}/>
+        <path d="M136 122q8 10 20 4" fill="none" ${st(3, PAPER)}/>
+        <circle cx="172" cy="148" r="3" fill="${d.deep}"/><circle cx="118" cy="154" r="2.6" fill="${d.deep}"/>
+        <circle cx="184" cy="96" r="2.2" fill="${d.deep}"/><circle cx="112" cy="92" r="2.2" fill="${d.deep}"/>
+      `
+    }[slug];
+    return svg('0 0 300 300', `Ilustrasi skematis ${d.sci}`, `
+      <circle cx="150" cy="150" r="124" fill="${d.soft}" ${st(2.4)}/>
+      <circle cx="150" cy="150" r="105" fill="none" ${st(1.4, d.deep)} stroke-dasharray="3 7" opacity=".55"/>
+      <g stroke="${INK}" stroke-width="2" stroke-linecap="round" opacity=".55">
+        <path d="M150 20v10M150 270v10M20 150h10M270 150h10M58 58l7 7M242 242l7 7M242 58l-7 7M58 242l-7-7"/>
+      </g>
+      ${specimen}
+      <text x="150" y="286" text-anchor="middle" font-family="monospace" font-size="8" letter-spacing="2" fill="${INK}" opacity=".55">SPESIMEN · TIDAK BERSKALA</text>
+    `);
+  },
+
+  cardArt(slug) {
+    const d = E(slug);
+    if (slug === 'dermatofitosis') return svg('0 0 360 220', 'Kucing dengan lesi kulit dan spora di sekitarnya', `
+      <rect width="360" height="220" fill="none"/>
+      ${cat(140, 126, 1.05, { patch: PINK, px: -15, py: 24 })}
+      <g class="float">${spore(238, 66, PINK, .8)}</g>
+      <g class="float2">${spore(276, 136, PINK, .6)}</g>
+      <g class="float3">${spore(70, 62, PINK, .5)}</g>
+      <path d="M238 174q30-20 56 0" fill="none" ${st(2, d.deep)} stroke-dasharray="4 7"/>
+      <path d="M238 174h56" ${st(2, d.deep)}/>
+      <text x="266" y="198" text-anchor="middle" font-family="monospace" font-size="7" letter-spacing="1.4" fill="${INK}" opacity=".55">KONTAK · BULU</text>
+      <circle cx="256" cy="174" r="3" fill="${PINK}"/>
+    `);
+    if (slug === 'toksokariasis') return svg('0 0 360 220', 'Anjing di dekat tanah dengan telur cacing', `
+      ${dog(136, 126, 1.05, { ear: '#38BDF8' })}
+      ${soil(254, 174, .9)}
+      <g class="float">${worm(260, 90, SKY, .7)}</g>
+      <g class="float2">${spore(80, 68, SKY, .4)}</g>
+      <path d="M216 148q22-8 38 6" fill="none" ${st(2, d.deep)} stroke-dasharray="4 7"/>
+      <text x="268" y="206" text-anchor="middle" font-family="monospace" font-size="7" letter-spacing="1.4" fill="${INK}" opacity=".55">TANAH · TELUR</text>
+    `);
+    return svg('0 0 360 220', 'Kucing di dekat litter box dan makanan', `
+      ${cat(128, 120, 1.02, {})}
+      ${litter(256, 162, 1, LAV)}
+      <g class="float">${oocyst(246, 74, LAV, .8)}</g>
+      <g class="float2">${oocyst(86, 66, LAV, .45)}</g>
+      <path d="M204 148q20-6 34 4" fill="none" ${st(2, d.deep)} stroke-dasharray="4 7"/>
+      <text x="262" y="204" text-anchor="middle" font-family="monospace" font-size="7" letter-spacing="1.4" fill="${INK}" opacity=".55">FESES · MAKANAN</text>
+    `);
+  },
+
+  stage(i) {
+    if (i === 0) return svg('0 0 520 360', 'Kucing di litter box mengeluarkan agen yang mencemari bulu, benda, dan tanah', `
+      ${sceneBg(520, 360, '#FCE7F3')}
+      ${cat(150, 206, 1.25, { patch: PINK, px: -15, py: 24 })}
+      ${litter(292, 268, 1.15, LAV)}
+      ${sofa(410, 190, .78, BLUE)}
+      ${soil(430, 286, .8)}
+      <g class="float">${spore(224, 120, PINK, .9)}</g>
+      <g class="float2">${spore(258, 160, LAV, .7)}</g>
+      <g class="float3">${worm(336, 150, SKY, .55)}</g>
+      <g class="float">${oocyst(388, 116, LAV, .7)}</g>
+      <path d="M192 236q40 10 74 30" fill="none" stroke="${PINK}" stroke-width="2.4" stroke-dasharray="5 8" stroke-linecap="round"/>
+      <path d="M300 240q50-24 82-26" fill="none" stroke="${AMBER}" stroke-width="2.4" stroke-dasharray="5 8" stroke-linecap="round"/>
+      <text x="42" y="326" font-family="monospace" font-size="8" letter-spacing="1.5" fill="${INK}" opacity=".55">BULU · FESES · BENDA</text>
+      <path d="M28 306h100" ${st(1.4)} stroke-dasharray="3 5"/>
+    `);
+    if (i === 1) return svg('0 0 520 360', 'Tangan anak yang tercemar menyentuh mulut, makanan, dan tanah', `
+      ${sceneBg(520, 360, '#DCE7FF')}
+      ${child(168, 204, 1.35, { shirt: PINK })}
+      ${bowl(340, 284, .9, SKY)}
+      ${soil(420, 290, .8)}
+      <path d="M214 188q42-30 68-12" fill="none" stroke="${PINK}" stroke-width="2.6" stroke-dasharray="5 8" stroke-linecap="round"/>
+      <path d="M232 200q22 20 18 46" fill="none" stroke="${BLUE}" stroke-width="2.6" stroke-dasharray="5 8" stroke-linecap="round"/>
+      <circle cx="282" cy="176" r="13" fill="#F2C9A0" ${st(2.4)}/>
+      <g class="float">${spore(300, 144, PINK, .7)}</g>
+      <g class="float2">${oocyst(344, 196, LAV, .55)}</g>
+      <g class="float3">${worm(406, 222, SKY, .45)}</g>
+      <path d="M282 190q-6 20-18 32" fill="none" ${st(2.4, PINK)}/>
+      <text x="42" y="326" font-family="monospace" font-size="8" letter-spacing="1.5" fill="${INK}" opacity=".55">TANGAN · MULUT · MAKANAN</text>
+      <path d="M28 306h126" ${st(1.4)} stroke-dasharray="3 5"/>
+    `);
+    return svg('0 0 520 360', 'Perisai perlindungan dan keluarga dengan risiko berbeda', `
+      ${sceneBg(520, 360, '#D1FAE5')}
+      <path d="M300 96l72 24v62c0 48-30 74-72 90-42-16-72-42-72-90v-62z" fill="${PAPER}" ${st(3)}/>
+      <path d="M268 188l22 22 42-50" fill="none" stroke="${MOSS}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+      <g class="float">${spore(182, 106, PINK, .6)}</g>
+      <g class="float2">${oocyst(424, 130, LAV, .6)}</g>
+      <g class="float3">${worm(400, 262, SKY, .5)}</g>
+      ${child(88, 268, .9, { shirt: PINK })}
+      ${person(430, 278, .9, { shirt: BLUE, pregnant: true })}
+      ${person(168, 292, .72, { shirt: LAV, scarf: AMBER })}
+      <path d="M300 266v54" ${st(2.4)} stroke-dasharray="4 6"/>
+      <text x="42" y="326" font-family="monospace" font-size="8" letter-spacing="1.5" fill="${INK}" opacity=".55">PAPARAN ≠ INFEKSI</text>
+      <path d="M28 306h118" ${st(1.4)} stroke-dasharray="3 5"/>
+    `);
+  },
+
+  animalSigns(slug) {
+    const isCat = slug !== 'toksokariasis';
+    const body = isCat
+      ? cat(178, 142, 1.55, slug === 'dermatofitosis' ? { patch: PINK, px: -18, py: 28, pr: 14 } : {})
+      : dog(178, 142, 1.55, { ear: '#38BDF8', belly: slug === 'toksokariasis' ? '#BAE6FD' : null });
+    const callouts = {
+      dermatofitosis: [['bulu rontok', 124, 168, 60, 74, PINK], ['kulit bersisik', 238, 178, 310, 96, PINK]],
+      toksokariasis: [['perut', 178, 202, 84, 264, SKY], ['feses', 270, 250, 330, 278, SKY]],
+      toksoplasmosis: [['sering tanpa tanda', 236, 132, 300, 66, LAV]]
+    }[slug] || [];
+    return svg('0 0 380 300', `Tanda pada hewan untuk ${E(slug).name}`, `
+      <circle cx="190" cy="150" r="128" fill="${E(slug).soft}" opacity=".65"/>
+      ${body}
+      <path d="M28 268h324" ${st(2)} stroke-dasharray="4 7"/>
+      ${callouts.map(([t, x, y, lx, ly, c]) => `
+        <path d="M${x} ${y}Q${(x + lx) / 2} ${ly - 20} ${lx} ${ly}" fill="none" ${st(1.6, c)} stroke-dasharray="3 5"/>
+        <circle cx="${x}" cy="${y}" r="5" fill="${c}" ${st(1.6)}/>
+        <text x="${lx}" y="${ly - 6}" text-anchor="${lx > 190 ? 'start' : 'end'}" font-family="monospace" font-size="8" letter-spacing="1" fill="${INK}">${t}</text>
+      `).join('')}
+    `);
+  },
+
+  humanSigns(slug) {
+    const callouts = {
+      dermatofitosis: [['ruam melingkar', 196, 160, 292, 100, PINK]],
+      toksokariasis: [['mata', 172, 92, 78, 58, SKY], ['perut', 190, 186, 302, 206, SKY]],
+      toksoplasmosis: [['mirip flu', 172, 94, 70, 64, LAV], ['konsultasi bila hamil', 196, 186, 300, 232, LAV]]
+    }[slug] || [];
+    return svg('0 0 380 300', `Tanda pada manusia untuk ${E(slug).name}`, `
+      <circle cx="190" cy="150" r="128" fill="${E(slug).soft}" opacity=".65"/>
+      ${person(190, 160, 1.45, { shirt: E(slug).color, patch: slug === 'dermatofitosis' ? PINK : null, px: -22, py: 24 })}
+      <path d="M28 268h324" ${st(2)} stroke-dasharray="4 7"/>
+      ${callouts.map(([t, x, y, lx, ly, c]) => `
+        <path d="M${x} ${y}Q${(x + lx) / 2} ${ly - 20} ${lx} ${ly}" fill="none" ${st(1.6, c)} stroke-dasharray="3 5"/>
+        <circle cx="${x}" cy="${y}" r="5" fill="${c}" ${st(1.6)}/>
+        <text x="${lx}" y="${ly - 6}" text-anchor="${lx > 190 ? 'start' : 'end'}" font-family="monospace" font-size="8" letter-spacing="1" fill="${INK}">${t}</text>
+      `).join('')}
+    `);
+  },
+
+  riskArt() {
+    return svg('0 0 520 260', 'Tiga kelompok yang perlu perhatian: anak, ibu hamil, dan orang dengan daya tahan tubuh rendah', `
+      <circle cx="260" cy="130" r="120" fill="${PAPER2}" ${st(1.6)} stroke-dasharray="4 7"/>
+      ${child(120, 150, 1.1, { shirt: PINK })}
+      ${person(260, 150, 1.1, { shirt: BLUE, pregnant: true })}
+      ${person(400, 150, 1.1, { shirt: LAV, scarf: AMBER })}
+      <text x="120" y="228" text-anchor="middle" font-family="monospace" font-size="8" letter-spacing="1.2" fill="${INK}">ANAK</text>
+      <text x="260" y="228" text-anchor="middle" font-family="monospace" font-size="8" letter-spacing="1.2" fill="${INK}">IBU HAMIL</text>
+      <text x="400" y="228" text-anchor="middle" font-family="monospace" font-size="8" letter-spacing="1.2" fill="${INK}">IMUNOKOMPROMAIS</text>
+      <g class="float">${spore(52, 50, PINK, .5)}</g>
+      <g class="float2">${oocyst(468, 48, LAV, .55)}</g>
+    `);
+  },
+
+  screenArt() {
+    return svg('0 0 460 300', 'Keluarga di rumah dengan pertanyaan skrining', `
+      <circle cx="230" cy="150" r="138" fill="#DCE7FF" opacity=".55"/>
+      <path d="M74 216 230 116l156 100v92H74z" fill="${PAPER}" ${st(2.8)}/>
+      <path d="M60 222 230 110l170 112" fill="none" ${st(4)}/>
+      ${cat(134, 248, .82, { patch: PINK, px: -14, py: 22 })}
+      ${dog(326, 250, .82, { ear: '#38BDF8' })}
+      ${child(230, 236, .95, { shirt: PINK })}
+      <g class="float">
+        <rect x="282" y="46" width="120" height="34" rx="17" fill="${PAPER}" ${st(2)}/>
+        <text x="342" y="67" text-anchor="middle" font-family="monospace" font-size="9" letter-spacing="1" fill="${INK}">ADA BALITA?</text>
+      </g>
+      <g class="float2">
+        <rect x="46" y="76" width="104" height="34" rx="17" fill="${PAPER}" ${st(2)}/>
+        <text x="98" y="97" text-anchor="middle" font-family="monospace" font-size="9" letter-spacing="1" fill="${INK}">IBU HAMIL?</text>
+      </g>
+      <path d="M28 276h404" ${st(2)} stroke-dasharray="4 7"/>
+    `);
+  },
+
+  reminderArt() {
+    return svg('0 0 460 300', 'Jam, sapu, dan litter box sebagai simbol rutinitas kebersihan', `
+      <circle cx="230" cy="150" r="136" fill="#D1FAE5" opacity=".55"/>
+      <circle cx="230" cy="144" r="78" fill="${PAPER}" ${st(3)}/>
+      <circle cx="230" cy="144" r="62" fill="none" ${st(1.4)} stroke-dasharray="3 7"/>
+      <path d="M230 144V98M230 144l32 20" ${st(4)}/>
+      <circle cx="230" cy="144" r="6" fill="${PINK}" ${st(1.8)}/>
+      <g stroke="${INK}" stroke-width="2" stroke-linecap="round" opacity=".55">
+        <path d="M230 76v8M230 204v8M162 144h8M290 144h8"/>
+      </g>
+      <path d="M126 206l58 24" ${st(5, AMBER)}/>
+      <path d="M184 230l-16 34M184 230l16 34M174 226l20 8" ${st(3, AMBER)}/>
+      ${litter(330, 232, .9, LAV)}
+      <g class="float">${spore(120, 82, PINK, .55)}</g>
+      <g class="float2">${oocyst(348, 96, LAV, .55)}</g>
+      <text x="230" y="282" text-anchor="middle" font-family="monospace" font-size="8" letter-spacing="1.5" fill="${INK}" opacity=".55">24 JAM · SATU KEBIASAAN</text>
+    `);
+  },
+
+  aboutArt() {
+    return svg('0 0 460 340', 'Meja kerja editorial dengan buku catatan, kaca pembesar, dan spesimen', `
+      <circle cx="230" cy="170" r="150" fill="#FEF3C7" opacity=".6"/>
+      <rect x="60" y="88" width="340" height="190" rx="8" fill="${PAPER}" ${st(3)}/>
+      <path d="M60 122h340" ${st(2)}/>
+      <rect x="90" y="146" width="128" height="108" rx="4" fill="${PAPER2}" ${st(2)}/>
+      <path d="M104 164h100M104 180h100M104 196h76M104 212h88M104 228h60" ${st(1.6)} stroke-dasharray="3 5"/>
+      <circle cx="304" cy="180" r="44" fill="${PAPER2}" ${st(4)}/>
+      <circle cx="304" cy="180" r="30" fill="${PINK}" opacity=".18" ${st(2)}/>
+      <path d="M336 212l34 34" ${st(8)}/>
+      <g class="float">${spore(272, 166, PINK, .65)}</g>
+      <g class="float2">${oocyst(326, 166, LAV, .65)}</g>
+      <g class="float3">${worm(300, 194, SKY, .45)}</g>
+      <path d="M92 302h276" ${st(2.4)}/>
+      <text x="230" y="324" text-anchor="middle" font-family="monospace" font-size="8" letter-spacing="1.5" fill="${INK}" opacity=".55">CATATAN LAPANGAN · EDISI RUMAH</text>
+    `);
+  },
+
+  qArt(kind) {
+    const map = {
+      child: `${child(120, 100, 1.1, { shirt: PINK })}${soil(210, 150, .7)}${spore(76, 50, PINK, .5)}`,
+      pregnant: `${person(120, 100, 1.1, { shirt: BLUE, pregnant: true })}${cat(210, 142, .7, {})}${spore(70, 48, LAV, .5)}`,
+      outside: `${cat(112, 108, .9, {})}${tree(206, 124, .7)}${spore(70, 46, PINK, .45)}`,
+      meat: `${bowl(110, 132, 1, SKY)}<path d="M84 118q26-22 52 0" fill="${PINK}" opacity=".55" ${st(2)}/>${oocyst(196, 88, LAV, .6)}`,
+      soil: `${soil(130, 132, 1)}${litter(222, 146, .7, LAV)}${worm(76, 60, SKY, .45)}`,
+      skin: `${cat(126, 108, .95, { patch: PINK, px: -14, py: 24 })}${spore(216, 72, PINK, .55)}`,
+      immune: `${person(116, 104, 1, { shirt: LAV, scarf: AMBER })}<path d="M190 82l26 10v22c0 18-12 28-26 34-14-6-26-16-26-34V92z" fill="${PAPER}" ${st(2)}/><path d="M180 112l8 8 16-20" fill="none" ${st(4, MOSS)}/>`
+    };
+    return svg('0 0 280 180', '', `<rect width="280" height="180" rx="12" fill="${PAPER2}"/>${map[kind] || map.child}`, 'q-art');
+  },
+
+  icon(name) {
+    const paths = {
+      hand: '<path d="M8 12V6a2 2 0 1 1 4 0v6M12 12V4a2 2 0 1 1 4 0v8M16 12V7a2 2 0 1 1 4 0v7c0 5-3 8-8 8h-1a8 8 0 0 1-7-4L2 14a2 2 0 0 1 3-2l3 3"/>',
+      scoop: '<path d="M4 20h16M8 20V9a4 4 0 0 1 8 0v11M6 9h12M16 4l4-2"/>',
+      bed: '<path d="M3 18V8h18v10M3 14h18M6 8V5h5v3M13 8V5h5v3M3 18v2M21 18v2"/>',
+      cook: '<path d="M4 12h16v3a6 6 0 0 1-6 6H10a6 6 0 0 1-6-6zM7 8c0-2 2-2 2-4M12 8c0-2 2-2 2-4M17 8c0-2 2-2 2-4M4 12h16"/>',
+      gloves: '<path d="M7 21v-5l-2-3V8a2 2 0 0 1 4 0v3M11 21V6a2 2 0 0 1 4 0v8M15 21v-6a2 2 0 0 1 4 0v4a4 4 0 0 1-4 4H7"/>',
+      vacuum: '<path d="M4 21h9M8 21l3-9M11 12l-2-6a3 3 0 0 1 3-4h2l4 10M17 12h4v4h-4z"/>',
+      vet: '<path d="M12 21s-7-4-7-10a4 4 0 0 1 7-2 4 4 0 0 1 7 2c0 6-7 10-7 10z"/><path d="M9 11h2l1-2 1 4 1-2h2"/>',
+      spray: '<path d="M9 21V8h7v13zM9 8V5h5v3M16 6h4M16 10h4M16 14h4M4 10l3 2M4 16l3-2"/>',
+      shield: '<path d="M12 3l8 3v6c0 5-3 8-8 10-5-2-8-5-8-10V6z"/><path d="M8 12l3 3 5-6"/>',
+      clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+      search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+      share: '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 11l8-4M8 13l8 4"/>',
+      arrow: '<path d="M4 12h15M13 6l6 6-6 6"/>',
+      back: '<path d="M20 12H5M11 6l-6 6 6 6"/>',
+      plus: '<path d="M12 5v14M5 12h14"/>',
+      check: '<path d="M4 12l5 5L20 6"/>',
+      info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>',
+      alert: '<path d="M12 3l9 17H3z"/><path d="M12 9v5M12 17h.01"/>',
+      home: '<path d="M4 11l8-7 8 7v9H4z"/><path d="M9 20v-6h6v6"/>',
+      book: '<path d="M4 5a3 3 0 0 1 3-3h13v18H7a3 3 0 0 0-3 3z"/><path d="M4 5v18M8 7h8M8 11h8"/>',
+      bell: '<path d="M6 17h12l-2-3V9a4 4 0 0 0-8 0v5zM10 20h4"/>',
+      compass: '<circle cx="12" cy="12" r="9"/><path d="M15 9l-2 5-4 2 2-5z"/>',
+      close: '<path d="M6 6l12 12M18 6L6 18"/>',
+      menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+      download: '<path d="M12 3v12M7 11l5 5 5-5M4 21h16"/>',
+      trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6"/>'
+    };
+    return `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.info}</svg>`;
+  }
+};
